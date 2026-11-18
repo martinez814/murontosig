@@ -8,6 +8,34 @@ mapboxgl.accessToken = 'pk.eyJ1IjoibWFydGluZXpraiIsImEiOiJjbXcyMnRib3EwMHg2Mnhvb
 // Coordenada Central exacta de MÜRÖNTÖ (Prados del Este - Torre Humboldt)
 const MURONTO_CENTER = [-66.871326, 10.453025];
 
+// ==========================================
+// CONEXIÓN A BASE DE DATOS EN LA NUBE (FIREBASE FIRESTORE)
+// Sincronización automática de puntos y calibración en tiempo real para todo el mundo
+// ==========================================
+const firebaseConfig = {
+  apiKey: "AIzaSyBsmmXzXUXXKDGDcISKfGA7beOizFrxIo4",
+  authDomain: "muronto-webgis.firebaseapp.com",
+  projectId: "muronto-webgis",
+  storageBucket: "muronto-webgis.firebasestorage.app",
+  messagingSenderId: "206499480120",
+  appId: "1:206499480120:web:0cc11fcd9bb18962121ccd",
+  measurementId: "G-WLXB6C33K1"
+};
+
+let db = null;
+let firebaseHabilitado = false;
+
+try {
+  if (typeof firebase !== 'undefined' && firebase.initializeApp) {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    firebaseHabilitado = true;
+    console.log('✓ Conectado exitosamente a Google Cloud Firestore');
+  }
+} catch (e) {
+  console.warn('Firebase no inicializado (modo local/offline):', e);
+}
+
 const STORAGE_KEY_CALIBRACION = 'muronto_calibracion_3d_v2';
 const STORAGE_KEY_BASE_ETERNA = 'muronto_base_eterna_v2';
 const STORAGE_KEY_LEGACY = 'muronto_calibracion_3d_v1';
@@ -458,6 +486,10 @@ map.on('load', () => {
   // Inicializar control de acceso / roles de usuario
   inicializarSistemaUsuarios();
 
+  // Iniciar sincronización en tiempo real con Firebase Firestore
+  iniciarSincronizacionPuntosNube();
+  iniciarSincronizacionCalibracionNube();
+
   // Click interactivo en Puestos de Trabajo
   map.on('click', 'capa-puestos', (e) => {
     if (modoInsercionPunto || puntoEnMovimientoId) return;
@@ -773,15 +805,32 @@ async function guardarCalibracion() {
     console.warn('Servidor no disponible para guardar en disco (modo Live Server o estático):', error);
   }
 
+  // 3. Sincronizar en la Nube (Google Cloud Firestore) para todos los usuarios
+  let guardadoEnNube = false;
+  if (db && firebaseHabilitado) {
+    try {
+      await db.collection('edificio').doc('calibracion').set({
+        ...config,
+        actualizadoEn: new Date().toISOString()
+      });
+      guardadoEnNube = true;
+      console.log('✓ Calibración guardada exitosamente en la nube (Firestore)');
+    } catch (e) {
+      console.warn('Error guardando calibración en Firestore:', e);
+    }
+  }
+
   // Feedback visual para el usuario
   const feedback = document.getElementById('saveFeedback');
   const btn = document.getElementById('btnGuardarCalibracion');
   if (feedback) {
     feedback.style.display = 'block';
     feedback.style.color = '#166534';
-    feedback.textContent = guardadoEnDisco 
-      ? '⭐ ¡Fijado como nuevo Reinicio Eterno (Disco y Navegador)!'
-      : '⭐ ¡Fijado como tu nuevo Reinicio Eterno!';
+    feedback.textContent = guardadoEnNube
+      ? '⭐ ¡Guardado en la Nube y fijado como Reinicio Eterno!'
+      : (guardadoEnDisco 
+        ? '⭐ ¡Fijado como nuevo Reinicio Eterno (Disco y Navegador)!'
+        : '⭐ ¡Fijado como tu nuevo Reinicio Eterno!');
     setTimeout(() => {
       feedback.style.display = 'none';
     }, 4000);
@@ -1879,6 +1928,79 @@ async function autoGuardarPuntosEnDisco() {
       body: JSON.stringify({ jsContent })
     });
   } catch (e) {}
+
+  // Sincronizar automáticamente en la Nube (Firestore) para que todos los usuarios lo vean
+  await guardarPuntosEnNube();
+}
+
+// ==========================================
+// SINCRONIZACIÓN EN LA NUBE (FIREBASE FIRESTORE)
+// ==========================================
+async function guardarPuntosEnNube() {
+  if (!db || !firebaseHabilitado) return;
+  try {
+    await db.collection('edificio').doc('puntos').set({
+      lista: coleccionPuntos,
+      actualizadoEn: new Date().toISOString()
+    });
+    console.log(`✓ Sincronización en la Nube: ${coleccionPuntos.length} puntos guardados en Firestore.`);
+  } catch (err) {
+    console.warn('Aviso al guardar puntos en Firestore (verifica que iniciaste Firestore en modo prueba):', err);
+  }
+}
+
+function iniciarSincronizacionPuntosNube() {
+  if (!db || !firebaseHabilitado) return;
+
+  db.collection('edificio').doc('puntos').onSnapshot((doc) => {
+    if (doc.exists) {
+      const data = doc.data();
+      if (Array.isArray(data.lista)) {
+        // Evitar sobrescribir si el usuario está activamente en medio de crear/editar en el modal
+        const editandoModal = document.getElementById('puntoModal') && document.getElementById('puntoModal').style.display !== 'none';
+        if (!modoInsercionPunto && !puntoEnMovimientoId && !editandoModal) {
+          coleccionPuntos = data.lista.map(p => {
+            if (typeof p.altitude !== 'number') {
+              const fNorm = (p.floor === 1 || p.floor === '1' || p.floor === 'PB' || p.floor === 'pb') ? 'PB' : 'Mezzanina';
+              p.altitude = fNorm === 'Mezzanina' ? 3.6 : 0.8;
+            }
+            return p;
+          });
+          sincronizarCapasDesdeColeccion();
+          console.log(`✓ Sincronización en vivo: ${coleccionPuntos.length} puntos cargados desde la nube (Firestore)`);
+        }
+      }
+    } else {
+      // Si la base de datos está vacía y hay puntos locales disponibles, inicializar Firestore
+      if (coleccionPuntos.length > 0 && usuarioRolActual === 'admin') {
+        guardarPuntosEnNube();
+      }
+    }
+  }, (err) => {
+    console.warn('Error en listener de puntos en Firestore:', err);
+  });
+}
+
+function iniciarSincronizacionCalibracionNube() {
+  if (!db || !firebaseHabilitado) return;
+
+  db.collection('edificio').doc('calibracion').onSnapshot((doc) => {
+    if (doc.exists) {
+      const data = doc.data();
+      if (data.exterior || data.interior) {
+        if (data.exterior) Object.assign(calibExterior, data.exterior);
+        if (data.interior) Object.assign(calibInterior, data.interior);
+        actualizarTransformacion();
+        if (typeof sincronizarSlidersUI === 'function') {
+          sincronizarSlidersUI();
+        }
+        if (map) map.triggerRepaint();
+        console.log('✓ Calibración 3D sincronizada en vivo desde la nube (Firestore)');
+      }
+    }
+  }, (err) => {
+    console.warn('Error en listener de calibración en Firestore:', err);
+  });
 }
 
 // ==========================================
@@ -2149,6 +2271,7 @@ window.restablecerCalibracion = restablecerCalibracion;
 window.copiarCalibracionParaChat = copiarCalibracionParaChat;
 window.descargarCalibracionJson = descargarCalibracionJson;
 window.sincronizarSlidersUI = sincronizarSlidersUI;
+window.guardarPuntosEnNube = guardarPuntosEnNube;
 
 // ==========================================
 // SISTEMA DE USUARIOS Y ROLES (ADMIN / VISITANTE)
