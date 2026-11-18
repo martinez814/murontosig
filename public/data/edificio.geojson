@@ -1,0 +1,75 @@
+{
+  "type": "FeatureCollection",
+  "name": "Edificio MÜRÖNTÖ - Modelo 3D",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "nombre": "Planta Baja - Recepción, Áreas Comunes y Servidores",
+        "piso": 1,
+        "height": 4,
+        "min_height": 0,
+        "color": "#3b82f6",
+        "descripcion": "Acceso principal, recepción, comedor y cuartos técnicos."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-66.871576, 10.453205],
+            [-66.871076, 10.453205],
+            [-66.871076, 10.452845],
+            [-66.871576, 10.452845],
+            [-66.871576, 10.453205]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nombre": "Nivel 2 - Desarrollo Tecnológico y WebGIS",
+        "piso": 2,
+        "height": 8,
+        "min_height": 4,
+        "color": "#10b981",
+        "descripcion": "Estaciones de trabajo de desarrollo, soporte y salas de reuniones."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-66.871540, 10.453180],
+            [-66.871110, 10.453180],
+            [-66.871110, 10.452870],
+            [-66.871540, 10.452870],
+            [-66.871540, 10.453180]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "nombre": "Nivel 3 - Dirección General y Sala de Conferencias",
+        "piso": 3,
+        "height": 12,
+        "min_height": 8,
+        "color": "#8b5cf6",
+        "descripcion": "Oficinas ejecutivas, sala de directorio y terraza técnica."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-66.871480, 10.453140],
+            [-66.871170, 10.453140],
+            [-66.871170, 10.452910],
+            [-66.871480, 10.452910],
+            [-66.871480, 10.453140]
+          ]
+        ]
+      }
+    }
+  ]
+}

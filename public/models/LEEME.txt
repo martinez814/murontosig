@@ -1,0 +1,7 @@
+Modelos 3D de MÜRÖNTÖ:
+
+1. Fachada Exterior:
+   mi-proyecto-webgis/public/models/edificioM-v1.glb
+
+2. Estructura Interior:
+   mi-proyecto-webgis/public/models/medidasmetros-v2.glb
