@@ -789,23 +789,7 @@ async function guardarCalibracion() {
   localStorage.setItem(STORAGE_KEY_BASE_ETERNA, JSON.stringify(config));
   console.log('✓ Guardado como Reinicio Eterno en localStorage:', config);
 
-  // 2. Guardar en el disco del servidor (si se ejecuta con Node server.js)
-  let guardadoEnDisco = false;
-  try {
-    const res = await fetch('api/calibracion', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(config)
-    });
-    if (res.ok) {
-      guardadoEnDisco = true;
-      console.log('✓ Calibración guardada físicamente en calibracion.json');
-    }
-  } catch (error) {
-    console.warn('Servidor no disponible para guardar en disco (modo Live Server o estático):', error);
-  }
-
-  // 3. Sincronizar en la Nube (Google Cloud Firestore) para todos los usuarios
+  // 2. Sincronizar en la Nube (Google Cloud Firestore) para todos los usuarios
   let guardadoEnNube = false;
   if (db && firebaseHabilitado) {
     try {
@@ -827,10 +811,8 @@ async function guardarCalibracion() {
     feedback.style.display = 'block';
     feedback.style.color = '#166534';
     feedback.textContent = guardadoEnNube
-      ? '⭐ ¡Guardado en la Nube y fijado como Reinicio Eterno!'
-      : (guardadoEnDisco 
-        ? '⭐ ¡Fijado como nuevo Reinicio Eterno (Disco y Navegador)!'
-        : '⭐ ¡Fijado como tu nuevo Reinicio Eterno!');
+      ? '⭐ ¡Calibración guardada en la Nube con éxito!'
+      : '⭐ ¡Fijado como tu nuevo Reinicio Eterno!';
     setTimeout(() => {
       feedback.style.display = 'none';
     }, 4000);
@@ -1920,16 +1902,7 @@ function descargarOfficeDataJs() {
 }
 
 async function autoGuardarPuntosEnDisco() {
-  const jsContent = generarCodigoOfficeData();
-  try {
-    await fetch('api/puntos', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ jsContent })
-    });
-  } catch (e) {}
-
-  // Sincronizar automáticamente en la Nube (Firestore) para que todos los usuarios lo vean
+  // Sincronizar automáticamente en la Nube (Google Cloud Firestore) para todos los usuarios
   await guardarPuntosEnNube();
 }
 

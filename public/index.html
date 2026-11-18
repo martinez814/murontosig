@@ -79,14 +79,6 @@
         <button id="btnModoInsertar" class="btn-action" style="background: #10b981; color: #ffffff; border-color: #059669; font-weight: 600;" onclick="toggleModoInsercion()">
           ➕ Insertar Nuevo Punto
         </button>
-        <div style="display: flex; gap: 6px;">
-          <button class="btn-action" style="flex: 1; font-size: 11px; padding: 5px 4px; background: #f8fafc; color: #334155; border: 1px solid #cbd5e1;" onclick="copiarPuntosCodigo()" title="Copia el código JavaScript de los puntos creados">
-            📋 Copiar Datos (JS)
-          </button>
-          <button class="btn-action" style="flex: 1; font-size: 11px; padding: 5px 4px; background: #f8fafc; color: #334155; border: 1px solid #cbd5e1;" onclick="descargarOfficeDataJs()" title="Descarga el archivo office_data.js listo con tus puntos">
-            📥 Descargar JS
-          </button>
-        </div>
       </div>
     </div>
 
@@ -173,19 +165,11 @@
         <!-- Botones de Acción de Calibración -->
         <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px;">
           <button id="btnGuardarCalibracion" class="btn-action" style="background: #2563eb; color: #ffffff; border-color: #1d4ed8; font-weight: 700;" onclick="guardarCalibracion()">
-            💾 Guardar Calibración (Fijar Reinicio)
+            💾 Guardar Calibración (Nube)
           </button>
-          <div style="display: flex; gap: 6px;">
-            <button class="btn-action" style="flex: 1; font-size: 11px; padding: 5px 4px; background: #f8fafc; color: #475569; border: 1px solid #cbd5e1;" onclick="restablecerCalibracion()" title="Restablecer a tu posición guardada">
-              ↺ Restablecer
-            </button>
-            <button class="btn-action" style="flex: 1; font-size: 11px; padding: 5px 4px; background: #f8fafc; color: #475569; border: 1px solid #cbd5e1;" onclick="copiarCalibracionParaChat()" title="Copiar código JSON">
-              📋 Copiar JSON
-            </button>
-            <button class="btn-action" style="flex: 1; font-size: 11px; padding: 5px 4px; background: #f8fafc; color: #475569; border: 1px solid #cbd5e1;" onclick="descargarCalibracionJson()" title="Descargar calibracion.json">
-              📥 Descargar
-            </button>
-          </div>
+          <button class="btn-action" style="font-size: 11px; padding: 6px; background: #f8fafc; color: #475569; border: 1px solid #cbd5e1;" onclick="restablecerCalibracion()" title="Restablecer a la posición guardada">
+            ↺ Restablecer Posición Guardada
+          </button>
         </div>
 
         <div id="saveFeedback" style="display: none; font-size: 11px; font-weight: 600; text-align: center; margin-top: 6px; padding: 6px; border-radius: 6px; background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;"></div>
@@ -406,10 +390,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <!-- 1. Cargar Datos Locales del Edificio y Oficinas -->
-  <script src="office_data.js?v=28"></script>
+  <script src="office_data.js?v=29"></script>
 
   <!-- 2. Cargar Lógica del Mapa, Capas y Three.js -->
-  <script src="js/map.js?v=28"></script>
+  <script src="js/map.js?v=29"></script>
 
 </body>
 </html>
