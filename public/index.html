@@ -14,7 +14,7 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
   <!-- Estilos Personalizados -->
-  <link rel="stylesheet" href="css/main.css?v=31">
+  <link rel="stylesheet" href="css/main.css?v=32">
 </head>
 <body>
 
@@ -255,17 +255,7 @@
           <span class="style-check">✓</span>
         </button>
 
-        <!-- Opción 2: Satélite con Calles (Ortofoto Aérea) -->
-        <button class="style-card-btn" data-style="mapbox://styles/mapbox/satellite-streets-v12" onclick="cambiarEstiloMapa('mapbox://styles/mapbox/satellite-streets-v12', this)">
-          <div class="style-badge-icon">🛰️</div>
-          <div class="style-info">
-            <span class="style-name">Satélite</span>
-            <span class="style-desc">Fotografía aérea real</span>
-          </div>
-          <span class="style-check">✓</span>
-        </button>
-
-        <!-- Opción 3: Modo Nocturno (Dark) -->
+        <!-- Opción 2: Modo Nocturno (Dark) -->
         <button class="style-card-btn" data-style="mapbox://styles/mapbox/dark-v11" onclick="cambiarEstiloMapa('mapbox://styles/mapbox/dark-v11', this)">
           <div class="style-badge-icon">🌙</div>
           <div class="style-info">
@@ -275,7 +265,7 @@
           <span class="style-check">✓</span>
         </button>
 
-        <!-- Opción 4: Calles y Vías (Streets) -->
+        <!-- Opción 3: Calles y Vías (Streets) -->
         <button class="style-card-btn" data-style="mapbox://styles/mapbox/streets-v12" onclick="cambiarEstiloMapa('mapbox://styles/mapbox/streets-v12', this)">
           <div class="style-badge-icon">🛣️</div>
           <div class="style-info">
@@ -285,7 +275,7 @@
           <span class="style-check">✓</span>
         </button>
 
-        <!-- Opción 5: Relieve y Terreno (Outdoors) -->
+        <!-- Opción 4: Relieve y Terreno (Outdoors) -->
         <button class="style-card-btn" data-style="mapbox://styles/mapbox/outdoors-v12" onclick="cambiarEstiloMapa('mapbox://styles/mapbox/outdoors-v12', this)">
           <div class="style-badge-icon">⛰️</div>
           <div class="style-info">
@@ -459,10 +449,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <!-- 1. Cargar Datos Locales del Edificio y Oficinas -->
-  <script src="office_data.js?v=31"></script>
+  <script src="office_data.js?v=32"></script>
 
   <!-- 2. Cargar Lógica del Mapa, Capas y Three.js -->
-  <script src="js/map.js?v=31"></script>
+  <script src="js/map.js?v=32"></script>
 
 </body>
 </html>

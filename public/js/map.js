@@ -531,6 +531,10 @@ function toggleColapsoEstilos() {
 function cargarEstiloMapaGuardado() {
   try {
     const guardado = localStorage.getItem('muronto_map_style');
+    if (guardado === 'mapbox://styles/mapbox/satellite-streets-v12') {
+      localStorage.removeItem('muronto_map_style');
+      return;
+    }
     if (guardado && guardado !== estiloMapaActual) {
       cambiarEstiloMapa(guardado);
     }
