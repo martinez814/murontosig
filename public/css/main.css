@@ -963,3 +963,178 @@ body, html {
   color: #64748b;
   border-top: 1px solid #e2e8f0;
 }
+
+/* ==========================================
+   PANEL FLOTANTE DE ESTILOS DE MAPA (Lado Derecho)
+   ========================================== */
+.map-styles-panel {
+  position: absolute;
+  top: 16px;
+  right: 54px;
+  z-index: 20;
+  width: 220px;
+  background: var(--bg-panel);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.map-styles-panel.collapsed .styles-list-body {
+  display: none;
+}
+
+.map-styles-panel.collapsed {
+  width: auto;
+  padding: 8px 12px;
+}
+
+.styles-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.map-styles-panel.collapsed .styles-panel-header {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.styles-header-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.styles-header-title .styles-icon {
+  font-size: 16px;
+}
+
+.btn-collapse-styles {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.btn-collapse-styles:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.styles-list-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.styles-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #64748b;
+}
+
+.style-buttons-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.style-card-btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 9px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.style-card-btn:hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
+  transform: translateY(-1px);
+}
+
+.style-card-btn.active {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 1px #2563eb;
+}
+
+.style-badge-icon {
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.style-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.style-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+.style-card-btn.active .style-name {
+  color: #1d4ed8;
+}
+
+.style-desc {
+  font-size: 9.5px;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+  margin-top: 1px;
+}
+
+.style-check {
+  font-size: 12px;
+  font-weight: 800;
+  color: #2563eb;
+  display: none;
+}
+
+.style-card-btn.active .style-check {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .map-styles-panel {
+    top: auto;
+    bottom: 50px;
+    right: 12px;
+    width: 185px;
+  }
+}

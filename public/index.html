@@ -14,7 +14,7 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
   <!-- Estilos Personalizados -->
-  <link rel="stylesheet" href="css/main.css?v=30">
+  <link rel="stylesheet" href="css/main.css?v=31">
 </head>
 <body>
 
@@ -232,6 +232,72 @@
     </div>
   </aside>
 
+  <!-- Panel Flotante de Estilos y Capas de Visualización (Lado Derecho) -->
+  <aside id="map-styles-panel" class="map-styles-panel">
+    <div class="styles-panel-header" onclick="toggleColapsoEstilos()" title="Clic para minimizar o expandir">
+      <div class="styles-header-title">
+        <span class="styles-icon">🗺️</span>
+        <span>Capas del Mapa</span>
+      </div>
+      <button id="btnColapsarEstilos" class="btn-collapse-styles" title="Minimizar panel">▲</button>
+    </div>
+
+    <div id="stylesListBody" class="styles-list-body">
+      <div class="styles-group-label">Estilos de Visualización</div>
+      <div class="style-buttons-grid">
+        <!-- Opción 1: Mapa Claro (Institucional por Defecto) -->
+        <button class="style-card-btn active" data-style="mapbox://styles/mapbox/light-v11" onclick="cambiarEstiloMapa('mapbox://styles/mapbox/light-v11', this)">
+          <div class="style-badge-icon">☀️</div>
+          <div class="style-info">
+            <span class="style-name">Claro</span>
+            <span class="style-desc">Institucional / Arquitectura</span>
+          </div>
+          <span class="style-check">✓</span>
+        </button>
+
+        <!-- Opción 2: Satélite con Calles (Ortofoto Aérea) -->
+        <button class="style-card-btn" data-style="mapbox://styles/mapbox/satellite-streets-v12" onclick="cambiarEstiloMapa('mapbox://styles/mapbox/satellite-streets-v12', this)">
+          <div class="style-badge-icon">🛰️</div>
+          <div class="style-info">
+            <span class="style-name">Satélite</span>
+            <span class="style-desc">Fotografía aérea real</span>
+          </div>
+          <span class="style-check">✓</span>
+        </button>
+
+        <!-- Opción 3: Modo Nocturno (Dark) -->
+        <button class="style-card-btn" data-style="mapbox://styles/mapbox/dark-v11" onclick="cambiarEstiloMapa('mapbox://styles/mapbox/dark-v11', this)">
+          <div class="style-badge-icon">🌙</div>
+          <div class="style-info">
+            <span class="style-name">Oscuro</span>
+            <span class="style-desc">Alto contraste nocturno</span>
+          </div>
+          <span class="style-check">✓</span>
+        </button>
+
+        <!-- Opción 4: Calles y Vías (Streets) -->
+        <button class="style-card-btn" data-style="mapbox://styles/mapbox/streets-v12" onclick="cambiarEstiloMapa('mapbox://styles/mapbox/streets-v12', this)">
+          <div class="style-badge-icon">🛣️</div>
+          <div class="style-info">
+            <span class="style-name">Calles</span>
+            <span class="style-desc">Trazado vial y urbano</span>
+          </div>
+          <span class="style-check">✓</span>
+        </button>
+
+        <!-- Opción 5: Relieve y Terreno (Outdoors) -->
+        <button class="style-card-btn" data-style="mapbox://styles/mapbox/outdoors-v12" onclick="cambiarEstiloMapa('mapbox://styles/mapbox/outdoors-v12', this)">
+          <div class="style-badge-icon">⛰️</div>
+          <div class="style-info">
+            <span class="style-name">Relieve</span>
+            <span class="style-desc">Topografía y curvas</span>
+          </div>
+          <span class="style-check">✓</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
   <!-- Banner flotante de modo activo -->
   <div id="editorBanner" class="editor-banner" style="display: none;">
     <span id="editorBannerTexto">🎯 Haz clic en el edificio para ubicar el punto</span>
@@ -393,10 +459,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <!-- 1. Cargar Datos Locales del Edificio y Oficinas -->
-  <script src="office_data.js?v=29"></script>
+  <script src="office_data.js?v=31"></script>
 
   <!-- 2. Cargar Lógica del Mapa, Capas y Three.js -->
-  <script src="js/map.js?v=29"></script>
+  <script src="js/map.js?v=31"></script>
 
 </body>
 </html>

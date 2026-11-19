@@ -216,9 +216,21 @@ const custom3DLayer = {
   type: 'custom',
   renderingMode: '3d',
   onAdd: function (mapInstance, gl) {
+    this.map = mapInstance;
+    this.renderer = new THREE.WebGLRenderer({
+      canvas: mapInstance.getCanvas(),
+      context: gl,
+      antialias: true
+    });
+    this.renderer.autoClear = false;
+
+    if (this.scene) {
+      console.log('✓ Re-vinculando capa Three.js al nuevo estilo de mapa');
+      return;
+    }
+
     this.camera = new THREE.Camera();
     this.scene = new THREE.Scene();
-    this.map = mapInstance;
 
     // Grupo raíz anclado en coordenadas MÜRÖNTÖ
     rootModelGroup = new THREE.Group();
@@ -352,13 +364,6 @@ const custom3DLayer = {
         console.info('Aviso: Coloca tu archivo en public/models/medidasmetros-v2.glb para ver el interior.');
       }
     );
-
-    this.renderer = new THREE.WebGLRenderer({
-      canvas: mapInstance.getCanvas(),
-      context: gl,
-      antialias: true
-    });
-    this.renderer.autoClear = false;
   },
   render: function (gl, matrix) {
     if (!this.scene || !this.camera || !modeloRealVisible) return;
@@ -416,6 +421,123 @@ const custom3DLayer = {
 };
 
 // ==========================================
+// GESTOR DE ESTILOS Y CAPAS DE MAPA (LADO DERECHO)
+// ==========================================
+let estiloMapaActual = 'mapbox://styles/mapbox/light-v11';
+
+function reconfigurarFuentesYCapasGeoJSON() {
+  if (!map.getSource('puestos-source')) {
+    map.addSource('puestos-source', {
+      type: 'geojson',
+      data: puestosData
+    });
+    map.addLayer({
+      id: 'capa-puestos',
+      type: 'circle',
+      source: 'puestos-source',
+      layout: { 'visibility': 'none' },
+      paint: {
+        'circle-radius': 0,
+        'circle-opacity': 0,
+        'circle-stroke-width': 0,
+        'circle-stroke-opacity': 0
+      }
+    });
+  }
+
+  if (!map.getSource('zonas-source')) {
+    map.addSource('zonas-source', {
+      type: 'geojson',
+      data: zonasData
+    });
+    map.addLayer({
+      id: 'capa-zonas',
+      type: 'circle',
+      source: 'zonas-source',
+      layout: { 'visibility': 'none' },
+      paint: {
+        'circle-radius': 0,
+        'circle-opacity': 0,
+        'circle-stroke-width': 0,
+        'circle-stroke-opacity': 0
+      }
+    });
+  }
+
+  if (!map.getSource('equipos-source')) {
+    map.addSource('equipos-source', {
+      type: 'geojson',
+      data: equipamientoData
+    });
+    map.addLayer({
+      id: 'capa-equipos',
+      type: 'circle',
+      source: 'equipos-source',
+      layout: { 'visibility': 'none' },
+      paint: {
+        'circle-radius': 0,
+        'circle-opacity': 0,
+        'circle-stroke-width': 0,
+        'circle-stroke-opacity': 0
+      }
+    });
+  }
+}
+
+function cambiarEstiloMapa(nuevoEstilo, botonElement) {
+  if (estiloMapaActual === nuevoEstilo) return;
+  estiloMapaActual = nuevoEstilo;
+
+  // Actualizar estado activo en los botones de estilo
+  document.querySelectorAll('.style-card-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-style') === nuevoEstilo);
+  });
+
+  try {
+    localStorage.setItem('muronto_map_style', nuevoEstilo);
+  } catch (e) {}
+
+  // Aplicar nuevo estilo en Mapbox
+  map.setStyle(nuevoEstilo);
+
+  // Re-conectar Three.js y capas GeoJSON cuando el nuevo estilo termine de cargar
+  map.once('style.load', () => {
+    if (!map.getLayer(custom3DLayer.id)) {
+      map.addLayer(custom3DLayer);
+    }
+    reconfigurarFuentesYCapasGeoJSON();
+    sincronizarCapasDesdeColeccion();
+    actualizarTransparenciaPorZoom();
+    actualizarTransformacion();
+    if (typeof actualizarPuntos3D === 'function') {
+      actualizarPuntos3D();
+    }
+    map.triggerRepaint();
+  });
+}
+
+function toggleColapsoEstilos() {
+  const panel = document.getElementById('map-styles-panel');
+  const btn = document.getElementById('btnColapsarEstilos');
+  if (panel) {
+    const colapsado = panel.classList.toggle('collapsed');
+    if (btn) {
+      btn.textContent = colapsado ? '▼' : '▲';
+      btn.title = colapsado ? 'Expandir panel' : 'Minimizar panel';
+    }
+  }
+}
+
+function cargarEstiloMapaGuardado() {
+  try {
+    const guardado = localStorage.getItem('muronto_map_style');
+    if (guardado && guardado !== estiloMapaActual) {
+      cambiarEstiloMapa(guardado);
+    }
+  } catch (e) {}
+}
+
+// ==========================================
 // CARGA DE CAPAS AL INICIAR MAPBOX
 // ==========================================
 map.on('load', () => {
@@ -426,59 +548,7 @@ map.on('load', () => {
   map.addLayer(custom3DLayer);
 
   // 2. Fuentes GeoJSON para datos de búsqueda y capas
-  map.addSource('puestos-source', {
-    type: 'geojson',
-    data: puestosData
-  });
-
-  map.addLayer({
-    id: 'capa-puestos',
-    type: 'circle',
-    source: 'puestos-source',
-    layout: { 'visibility': 'none' },
-    paint: {
-      'circle-radius': 0,
-      'circle-opacity': 0,
-      'circle-stroke-width': 0,
-      'circle-stroke-opacity': 0
-    }
-  });
-
-  map.addSource('zonas-source', {
-    type: 'geojson',
-    data: zonasData
-  });
-
-  map.addLayer({
-    id: 'capa-zonas',
-    type: 'circle',
-    source: 'zonas-source',
-    layout: { 'visibility': 'none' },
-    paint: {
-      'circle-radius': 0,
-      'circle-opacity': 0,
-      'circle-stroke-width': 0,
-      'circle-stroke-opacity': 0
-    }
-  });
-
-  map.addSource('equipos-source', {
-    type: 'geojson',
-    data: equipamientoData
-  });
-
-  map.addLayer({
-    id: 'capa-equipos',
-    type: 'circle',
-    source: 'equipos-source',
-    layout: { 'visibility': 'none' },
-    paint: {
-      'circle-radius': 0,
-      'circle-opacity': 0,
-      'circle-stroke-width': 0,
-      'circle-stroke-opacity': 0
-    }
-  });
+  reconfigurarFuentesYCapasGeoJSON();
 
   // Cargar puntos de interior (desde localStorage o archivo office_data.js)
   cargarPuntosIniciales();
@@ -489,6 +559,9 @@ map.on('load', () => {
   // Iniciar sincronización en tiempo real con Firebase Firestore
   iniciarSincronizacionPuntosNube();
   iniciarSincronizacionCalibracionNube();
+
+  // Cargar estilo preferido guardado si existe
+  cargarEstiloMapaGuardado();
 
   // Click interactivo en Puestos de Trabajo
   map.on('click', 'capa-puestos', (e) => {
@@ -2393,10 +2466,12 @@ if (document.readyState === 'loading') {
   inicializarSistemaUsuarios();
 }
 
-// Exportar funciones del sistema de usuarios globalmente
+// Exportar funciones del sistema de usuarios y estilos globalmente
 window.iniciarSesionVisitante = iniciarSesionVisitante;
 window.intentarLoginAdmin = intentarLoginAdmin;
 window.cerrarSesionUsuario = cerrarSesionUsuario;
 window.aplicarRolUsuario = aplicarRolUsuario;
 window.mostrarVentanaLogin = mostrarVentanaLogin;
 window.cerrarVentanaLogin = cerrarVentanaLogin;
+window.cambiarEstiloMapa = cambiarEstiloMapa;
+window.toggleColapsoEstilos = toggleColapsoEstilos;
