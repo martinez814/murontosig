@@ -14,7 +14,7 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
   <!-- Estilos Personalizados -->
-  <link rel="stylesheet" href="css/main.css?v=36">
+  <link rel="stylesheet" href="css/main.css?v=37">
 </head>
 <body>
 
@@ -444,8 +444,8 @@
     </div>
   </div>
 
-  <!-- Barra Inferior: Inspector de Coordenadas -->
-  <div id="coords-bar">
+  <!-- Barra Inferior: Inspector de Coordenadas (Esquina Inferior Derecha) -->
+  <div id="coords-bar" style="position: absolute !important; bottom: 14px !important; right: 16px !important; left: auto !important; z-index: 20 !important;">
     <span id="coords-display">Longitud: -66.871326 | Latitud: 10.453025</span>
     <button id="copy-coords-btn">Copiar</button>
   </div>
@@ -455,10 +455,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <!-- 1. Cargar Datos Locales del Edificio y Oficinas -->
-  <script src="office_data.js?v=35"></script>
+  <script src="office_data.js?v=37"></script>
 
   <!-- 2. Cargar Lógica del Mapa, Capas y Three.js -->
-  <script src="js/map.js?v=35"></script>
+  <script src="js/map.js?v=37"></script>
 
 </body>
 </html>

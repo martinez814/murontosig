@@ -1363,10 +1363,17 @@ function centrarSede() {
 }
 
 // ==========================================
-// INSPECTOR DE COORDENADAS (Barra Inferior)
+// INSPECTOR DE COORDENADAS (Barra Inferior Lado Derecho)
 // ==========================================
 const coordsDisplay = document.getElementById('coords-display');
 const copyCoordsBtn = document.getElementById('copy-coords-btn');
+const coordsBarElem = document.getElementById('coords-bar');
+if (coordsBarElem) {
+  coordsBarElem.style.setProperty('left', 'auto', 'important');
+  coordsBarElem.style.setProperty('right', '16px', 'important');
+  coordsBarElem.style.setProperty('bottom', '14px', 'important');
+  coordsBarElem.style.setProperty('position', 'absolute', 'important');
+}
 
 let ultimaCoordenada = MURONTO_CENTER;
 

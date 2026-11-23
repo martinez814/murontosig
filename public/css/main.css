@@ -448,10 +448,11 @@ body, html {
    BARRA INFERIOR DE COORDENADAS / INSPECTOR (Lado Derecho)
    ========================================== */
 #coords-bar {
-  position: absolute;
-  bottom: 14px;
-  right: 16px;
-  z-index: 20;
+  position: absolute !important;
+  bottom: 14px !important;
+  right: 16px !important;
+  left: auto !important;
+  z-index: 20 !important;
   background: var(--bg-panel);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -461,7 +462,7 @@ body, html {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   font-size: 11px;
   color: #475569;
-  display: flex;
+  display: flex !important;
   align-items: center;
   gap: 12px;
   user-select: none;
