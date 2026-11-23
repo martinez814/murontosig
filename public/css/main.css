@@ -53,6 +53,13 @@ body, html {
   flex-direction: column;
   gap: 14px;
   overflow-y: auto;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease;
+}
+
+#control-panel.panel-hidden {
+  transform: translateX(-115%) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 /* Encabezado */
@@ -1131,14 +1138,86 @@ body, html {
 }
 
 /* ==========================================
-   BOTONES Y COMPONENTES MÓVILES
+   BOTONES DE ESCONDER / MOSTRAR PANEL CIDE - MÜRÖNTÖ
    ========================================== */
-.btn-floating-mobile-menu {
+.btn-floating-show-panel {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 22;
   display: none;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid #cbd5e1;
+  border-radius: 9999px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
 }
 
-.btn-close-mobile-panel {
-  display: none;
+.btn-floating-show-panel:hover {
+  background: #ffffff;
+  border-color: #2563eb;
+  color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.22);
+}
+
+.btn-floating-show-panel:active {
+  transform: scale(0.97);
+}
+
+.show-panel-arrow {
+  color: #2563eb;
+  font-size: 12px;
+}
+
+/* Botón de esconder en el encabezado del panel */
+.btn-hide-panel {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-hide-panel:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+/* Botón de esconder rápido en la barra de rol visitante */
+.btn-hide-quick {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-hide-quick:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
 }
 
 .mobile-panel-backdrop {
@@ -1149,36 +1228,13 @@ body, html {
    ADAPTACIÓN RESPONSIVA MÓVIL (Smartphones y Tablets)
    ========================================== */
 @media (max-width: 768px) {
-  /* Botón Flotante para abrir panel en móvil */
-  .btn-floating-mobile-menu {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    position: absolute;
+  /* Botón Flotante para reabrir panel en móvil */
+  .btn-floating-show-panel {
     top: 14px;
     left: 14px;
-    z-index: 30;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1.5px solid #cbd5e1;
-    border-radius: 9999px;
-    padding: 8px 16px;
-    font-size: 13px;
-    font-weight: 700;
-    color: #0f172a;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
-    cursor: pointer;
-    transition: all 0.2s ease;
+    padding: 7px 14px;
+    font-size: 12px;
   }
-
-  .btn-floating-mobile-menu:active {
-    transform: scale(0.96);
-    background: #f1f5f9;
-  }
-
-  .mobile-menu-icon {
-    font-size: 16px;
     line-height: 1;
     color: #2563eb;
   }

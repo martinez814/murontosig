@@ -14,21 +14,22 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
   <!-- Estilos Personalizados -->
-  <link rel="stylesheet" href="css/main.css?v=33">
+  <link rel="stylesheet" href="css/main.css?v=34">
 </head>
 <body>
 
   <!-- Contenedor del Mapa 3D -->
   <div id="map"></div>
 
-  <!-- Botón Flotante para Abrir Menú en Celulares / Pantallas Táctiles -->
-  <button id="btnAbrirPanelMovil" class="btn-floating-mobile-menu" onclick="togglePanelMovil(true)" title="Abrir panel de control">
-    <span class="mobile-menu-icon">☰</span>
-    <span class="mobile-menu-label">Panel MÜRÖNTÖ</span>
+  <!-- Botón Flotante para Reabrir la Ventana CIDE - MÜRÖNTÖ cuando está escondida -->
+  <button id="btnMostrarPanel" class="btn-floating-show-panel" onclick="toggleOcultarPanel(false)" title="Mostrar ventana de CIDE - MÜRÖNTÖ">
+    <span class="show-panel-icon">🏢</span>
+    <span class="show-panel-text">CIDE - MÜRÖNTÖ</span>
+    <span class="show-panel-arrow">▶</span>
   </button>
 
   <!-- Fondo translúcido para cerrar menú al tocar afuera en celular -->
-  <div id="mobilePanelBackdrop" class="mobile-panel-backdrop" onclick="togglePanelMovil(false)"></div>
+  <div id="mobilePanelBackdrop" class="mobile-panel-backdrop" onclick="toggleOcultarPanel(true)"></div>
 
   <!-- Panel de Control Flotante -->
   <aside id="control-panel">
@@ -42,7 +43,9 @@
       </div>
       <div style="display: flex; align-items: center; gap: 6px;">
         <span class="badge-pill">WebGIS 3D</span>
-        <button id="btnCerrarPanelMovil" class="btn-close-mobile-panel" onclick="togglePanelMovil(false)" title="Ocultar panel para ver el mapa">✕</button>
+        <button id="btnEsconderPanel" class="btn-hide-panel" onclick="toggleOcultarPanel(true)" title="Esconder ventana para ver el mapa 3D completo">
+          ◀ Esconder
+        </button>
       </div>
     </div>
 
@@ -51,9 +54,14 @@
       <div id="roleInfoText" class="role-info-text">
         <span style="color: #2563eb;">👤 Visitante</span>
       </div>
-      <button id="btnCambiarRol" class="btn-change-role" onclick="cerrarSesionUsuario()" title="Cambiar usuario o perfil">
-        🔄 Cambiar Rol
-      </button>
+      <div style="display: flex; gap: 6px; align-items: center;">
+        <button id="btnEsconderRolVisitante" class="btn-hide-quick" onclick="toggleOcultarPanel(true)" title="Esconder ventana de CIDE - MÜRÖNTÖ">
+          👁️ Esconder
+        </button>
+        <button id="btnCambiarRol" class="btn-change-role" onclick="cerrarSesionUsuario()" title="Cambiar usuario o perfil">
+          🔄 Cambiar Rol
+        </button>
+      </div>
     </div>
 
     <!-- Buscador Inteligente con Autocompletado -->
@@ -461,10 +469,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <!-- 1. Cargar Datos Locales del Edificio y Oficinas -->
-  <script src="office_data.js?v=33"></script>
+  <script src="office_data.js?v=34"></script>
 
   <!-- 2. Cargar Lógica del Mapa, Capas y Three.js -->
-  <script src="js/map.js?v=33"></script>
+  <script src="js/map.js?v=34"></script>
 
 </body>
 </html>

@@ -550,31 +550,42 @@ function cargarEstiloMapaGuardado() {
 }
 
 // ==========================================
-// CONTROL DEL PANEL EN DISPOSITIVOS MÓVILES (CELULARES)
+// CONTROL PARA ESCONDER / MOSTRAR EL PANEL CIDE - MÜRÖNTÖ
 // ==========================================
-function togglePanelMovil(abrir) {
+function toggleOcultarPanel(forzarOcultar) {
   const panel = document.getElementById('control-panel');
+  const btnMostrar = document.getElementById('btnMostrarPanel');
   const backdrop = document.getElementById('mobilePanelBackdrop');
-  const btnAbrir = document.getElementById('btnAbrirPanelMovil');
 
-  const debeAbrir = typeof abrir === 'boolean'
-    ? abrir
-    : (panel ? !panel.classList.contains('mobile-open') : false);
+  if (!panel) return;
 
-  if (panel) {
-    panel.classList.toggle('mobile-open', debeAbrir);
+  const estaOculto = panel.classList.contains('panel-hidden') || (window.innerWidth <= 768 && !panel.classList.contains('mobile-open'));
+  const debeOcultar = typeof forzarOcultar === 'boolean' 
+    ? forzarOcultar 
+    : !estaOculto;
+
+  if (debeOcultar) {
+    panel.classList.add('panel-hidden');
+    panel.classList.remove('mobile-open');
+    if (btnMostrar) btnMostrar.style.display = 'flex';
+    if (backdrop) backdrop.classList.remove('active');
+  } else {
+    panel.classList.remove('panel-hidden');
+    if (window.innerWidth <= 768) {
+      panel.classList.add('mobile-open');
+      if (backdrop) backdrop.classList.add('active');
+    }
+    if (btnMostrar) btnMostrar.style.display = 'none';
   }
-  if (backdrop) {
-    backdrop.classList.toggle('active', debeAbrir);
-  }
-  if (btnAbrir) {
-    btnAbrir.style.display = debeAbrir ? 'none' : '';
-  }
+}
+
+function togglePanelMovil(abrir) {
+  toggleOcultarPanel(typeof abrir === 'boolean' ? !abrir : undefined);
 }
 
 function autoCerrarPanelEnMovil() {
   if (window.innerWidth <= 768) {
-    togglePanelMovil(false);
+    toggleOcultarPanel(true);
   }
 }
 
@@ -2540,3 +2551,4 @@ window.cambiarEstiloMapa = cambiarEstiloMapa;
 window.toggleColapsoEstilos = toggleColapsoEstilos;
 window.togglePanelMovil = togglePanelMovil;
 window.autoCerrarPanelEnMovil = autoCerrarPanelEnMovil;
+window.toggleOcultarPanel = toggleOcultarPanel;
