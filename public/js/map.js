@@ -497,6 +497,14 @@ function cambiarEstiloMapa(nuevoEstilo, botonElement) {
     localStorage.setItem('muronto_map_style', nuevoEstilo);
   } catch (e) {}
 
+  // Si está en celular, colapsar el menú de estilos tras elegir opción para ver el mapa
+  if (window.innerWidth <= 768) {
+    const panel = document.getElementById('map-styles-panel');
+    if (panel && !panel.classList.contains('collapsed')) {
+      toggleColapsoEstilos();
+    }
+  }
+
   // Aplicar nuevo estilo en Mapbox
   map.setStyle(nuevoEstilo);
 
@@ -542,6 +550,35 @@ function cargarEstiloMapaGuardado() {
 }
 
 // ==========================================
+// CONTROL DEL PANEL EN DISPOSITIVOS MÓVILES (CELULARES)
+// ==========================================
+function togglePanelMovil(abrir) {
+  const panel = document.getElementById('control-panel');
+  const backdrop = document.getElementById('mobilePanelBackdrop');
+  const btnAbrir = document.getElementById('btnAbrirPanelMovil');
+
+  const debeAbrir = typeof abrir === 'boolean'
+    ? abrir
+    : (panel ? !panel.classList.contains('mobile-open') : false);
+
+  if (panel) {
+    panel.classList.toggle('mobile-open', debeAbrir);
+  }
+  if (backdrop) {
+    backdrop.classList.toggle('active', debeAbrir);
+  }
+  if (btnAbrir) {
+    btnAbrir.style.display = debeAbrir ? 'none' : '';
+  }
+}
+
+function autoCerrarPanelEnMovil() {
+  if (window.innerWidth <= 768) {
+    togglePanelMovil(false);
+  }
+}
+
+// ==========================================
 // CARGA DE CAPAS AL INICIAR MAPBOX
 // ==========================================
 map.on('load', () => {
@@ -566,6 +603,16 @@ map.on('load', () => {
 
   // Cargar estilo preferido guardado si existe
   cargarEstiloMapaGuardado();
+
+  // En celulares, colapsar el menú de estilos por defecto para máxima visibilidad 3D
+  if (window.innerWidth <= 768) {
+    const panelEstilos = document.getElementById('map-styles-panel');
+    if (panelEstilos) {
+      panelEstilos.classList.add('collapsed');
+      const btn = document.getElementById('btnColapsarEstilos');
+      if (btn) btn.textContent = '▼';
+    }
+  }
 
   // Click interactivo en Puestos de Trabajo
   map.on('click', 'capa-puestos', (e) => {
@@ -1071,6 +1118,7 @@ function toggleTerrenoModelo() {
 // ==========================================
 function filtrarPorNivel(piso) {
   currentFloor = piso;
+  autoCerrarPanelEnMovil();
 
   document.querySelectorAll('.level-btn').forEach(btn => {
     btn.classList.toggle('active', btn.getAttribute('data-level') === String(piso));
@@ -1186,6 +1234,7 @@ function actualizarSugerencias(query) {
 }
 
 function seleccionarResultado(id) {
+  autoCerrarPanelEnMovil();
   const item = searchData.find(i => String(i.id) === String(id));
   if (!item) return;
 
@@ -1264,6 +1313,7 @@ document.addEventListener('click', (e) => {
 // VISTAS RÁPIDAS (PRESETS)
 // ==========================================
 function verVista3D() {
+  autoCerrarPanelEnMovil();
   map.flyTo({
     center: MURONTO_CENTER,
     zoom: 19.3,
@@ -1274,6 +1324,7 @@ function verVista3D() {
 }
 
 function verVista2D() {
+  autoCerrarPanelEnMovil();
   map.flyTo({
     center: MURONTO_CENTER,
     zoom: 19.6,
@@ -1284,6 +1335,7 @@ function verVista2D() {
 }
 
 function centrarSede() {
+  autoCerrarPanelEnMovil();
   filtrarPorNivel('all');
   map.flyTo({
     center: MURONTO_CENTER,
@@ -2341,6 +2393,9 @@ function inicializarSistemaUsuarios() {
 }
 
 function mostrarVentanaLogin() {
+  if (window.innerWidth <= 768) {
+    togglePanelMovil(false);
+  }
   const overlay = document.getElementById('loginOverlay');
   if (overlay) {
     overlay.style.display = 'flex';
@@ -2358,6 +2413,10 @@ function cerrarVentanaLogin() {
   const overlay = document.getElementById('loginOverlay');
   if (overlay) {
     overlay.style.display = 'none';
+  }
+  // En pantallas móviles, asegurar que el panel inicie cerrado para mostrar el edificio 3D en pantalla completa
+  if (window.innerWidth <= 768) {
+    togglePanelMovil(false);
   }
 }
 
@@ -2479,3 +2538,5 @@ window.mostrarVentanaLogin = mostrarVentanaLogin;
 window.cerrarVentanaLogin = cerrarVentanaLogin;
 window.cambiarEstiloMapa = cambiarEstiloMapa;
 window.toggleColapsoEstilos = toggleColapsoEstilos;
+window.togglePanelMovil = togglePanelMovil;
+window.autoCerrarPanelEnMovil = autoCerrarPanelEnMovil;

@@ -14,12 +14,21 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
   <!-- Estilos Personalizados -->
-  <link rel="stylesheet" href="css/main.css?v=32">
+  <link rel="stylesheet" href="css/main.css?v=33">
 </head>
 <body>
 
   <!-- Contenedor del Mapa 3D -->
   <div id="map"></div>
+
+  <!-- Botón Flotante para Abrir Menú en Celulares / Pantallas Táctiles -->
+  <button id="btnAbrirPanelMovil" class="btn-floating-mobile-menu" onclick="togglePanelMovil(true)" title="Abrir panel de control">
+    <span class="mobile-menu-icon">☰</span>
+    <span class="mobile-menu-label">Panel MÜRÖNTÖ</span>
+  </button>
+
+  <!-- Fondo translúcido para cerrar menú al tocar afuera en celular -->
+  <div id="mobilePanelBackdrop" class="mobile-panel-backdrop" onclick="togglePanelMovil(false)"></div>
 
   <!-- Panel de Control Flotante -->
   <aside id="control-panel">
@@ -31,7 +40,10 @@
           <h1>CIDE - MÜRÖNTÖ</h1>
         </div>
       </div>
-      <span class="badge-pill">WebGIS 3D</span>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span class="badge-pill">WebGIS 3D</span>
+        <button id="btnCerrarPanelMovil" class="btn-close-mobile-panel" onclick="togglePanelMovil(false)" title="Ocultar panel para ver el mapa">✕</button>
+      </div>
     </div>
 
     <!-- Barra de Perfil / Rol Activo -->
@@ -449,10 +461,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <!-- 1. Cargar Datos Locales del Edificio y Oficinas -->
-  <script src="office_data.js?v=32"></script>
+  <script src="office_data.js?v=33"></script>
 
   <!-- 2. Cargar Lógica del Mapa, Capas y Three.js -->
-  <script src="js/map.js?v=32"></script>
+  <script src="js/map.js?v=33"></script>
 
 </body>
 </html>
