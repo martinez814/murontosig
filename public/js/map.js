@@ -550,42 +550,47 @@ function cargarEstiloMapaGuardado() {
 }
 
 // ==========================================
-// CONTROL PARA ESCONDER / MOSTRAR EL PANEL CIDE - MÜRÖNTÖ
+// CONTROL PARA COLAPSAR / EXPANDIR PANEL CIDE - MÜRÖNTÖ
 // ==========================================
-function toggleOcultarPanel(forzarOcultar) {
+function toggleColapsoControlPanel(forzarColapso) {
   const panel = document.getElementById('control-panel');
-  const btnMostrar = document.getElementById('btnMostrarPanel');
-  const backdrop = document.getElementById('mobilePanelBackdrop');
-
+  const btn = document.getElementById('btnColapsarControlPanel');
   if (!panel) return;
 
-  const estaOculto = panel.classList.contains('panel-hidden') || (window.innerWidth <= 768 && !panel.classList.contains('mobile-open'));
-  const debeOcultar = typeof forzarOcultar === 'boolean' 
-    ? forzarOcultar 
-    : !estaOculto;
+  const nuevoColapso = typeof forzarColapso === 'boolean'
+    ? forzarColapso
+    : !panel.classList.contains('collapsed');
 
-  if (debeOcultar) {
-    panel.classList.add('panel-hidden');
-    panel.classList.remove('mobile-open');
-    if (btnMostrar) btnMostrar.style.display = 'flex';
-    if (backdrop) backdrop.classList.remove('active');
-  } else {
-    panel.classList.remove('panel-hidden');
-    if (window.innerWidth <= 768) {
-      panel.classList.add('mobile-open');
-      if (backdrop) backdrop.classList.add('active');
+  if (nuevoColapso) {
+    panel.classList.add('collapsed');
+    if (btn) {
+      btn.textContent = '▼';
+      btn.title = 'Expandir ventana';
     }
-    if (btnMostrar) btnMostrar.style.display = 'none';
+  } else {
+    panel.classList.remove('collapsed');
+    if (btn) {
+      btn.textContent = '▲';
+      btn.title = 'Minimizar ventana';
+    }
   }
 }
 
+function colapsarControlPanel(colapsar) {
+  toggleColapsoControlPanel(colapsar);
+}
+
+function toggleOcultarPanel(forzarOcultar) {
+  toggleColapsoControlPanel(forzarOcultar);
+}
+
 function togglePanelMovil(abrir) {
-  toggleOcultarPanel(typeof abrir === 'boolean' ? !abrir : undefined);
+  toggleColapsoControlPanel(typeof abrir === 'boolean' ? !abrir : undefined);
 }
 
 function autoCerrarPanelEnMovil() {
   if (window.innerWidth <= 768) {
-    toggleOcultarPanel(true);
+    toggleColapsoControlPanel(true);
   }
 }
 
@@ -2395,6 +2400,9 @@ function inicializarSistemaUsuarios() {
     if (rolGuardado === 'admin' || rolGuardado === 'visitante') {
       aplicarRolUsuario(rolGuardado);
       cerrarVentanaLogin();
+      if (rolGuardado === 'visitante') {
+        toggleColapsoControlPanel(true);
+      }
     } else {
       mostrarVentanaLogin();
     }
@@ -2438,6 +2446,8 @@ function iniciarSesionVisitante() {
   } catch (e) {}
   aplicarRolUsuario('visitante');
   cerrarVentanaLogin();
+  // Minimizar / colapsar el panel automáticamente para visitante para máxima visibilidad
+  toggleColapsoControlPanel(true);
 }
 
 function intentarLoginAdmin() {
@@ -2453,6 +2463,8 @@ function intentarLoginAdmin() {
     } catch (e) {}
     aplicarRolUsuario('admin');
     cerrarVentanaLogin();
+    // Expandir panel para que el administrador tenga acceso directo a las herramientas
+    toggleColapsoControlPanel(false);
   } else {
     if (err) {
       err.style.display = 'block';
@@ -2549,6 +2561,8 @@ window.mostrarVentanaLogin = mostrarVentanaLogin;
 window.cerrarVentanaLogin = cerrarVentanaLogin;
 window.cambiarEstiloMapa = cambiarEstiloMapa;
 window.toggleColapsoEstilos = toggleColapsoEstilos;
+window.toggleColapsoControlPanel = toggleColapsoControlPanel;
+window.colapsarControlPanel = colapsarControlPanel;
 window.togglePanelMovil = togglePanelMovil;
 window.autoCerrarPanelEnMovil = autoCerrarPanelEnMovil;
 window.toggleOcultarPanel = toggleOcultarPanel;

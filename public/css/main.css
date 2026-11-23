@@ -48,18 +48,41 @@ body, html {
   border: 1px solid var(--border-color);
   border-radius: 12px;
   box-shadow: var(--shadow);
-  padding: 16px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#control-panel.collapsed .control-panel-body {
+  display: none;
+}
+
+#control-panel.collapsed {
+  width: auto;
+  max-height: none;
+  padding: 8px 14px;
+  gap: 0;
+  overflow: visible;
+  border-radius: 9999px;
+}
+
+#control-panel.collapsed:hover {
+  background: #ffffff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
+}
+
+#control-panel.collapsed .panel-header {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.control-panel-body {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  overflow-y: auto;
-  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease;
-}
-
-#control-panel.panel-hidden {
-  transform: translateX(-115%) !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
 }
 
 /* Encabezado */
@@ -67,8 +90,27 @@ body, html {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   border-bottom: 1px solid #f1f5f9;
   padding-bottom: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn-collapse-panel {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.btn-collapse-panel:hover {
+  background: #e2e8f0;
+  color: #1e293b;
 }
 
 .brand-badge {
@@ -999,7 +1041,13 @@ body, html {
 
 .map-styles-panel.collapsed {
   width: auto;
-  padding: 8px 12px;
+  padding: 8px 14px;
+  border-radius: 9999px;
+}
+
+.map-styles-panel.collapsed:hover {
+  background: #ffffff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
 }
 
 .styles-panel-header {
@@ -1138,162 +1186,25 @@ body, html {
 }
 
 /* ==========================================
-   BOTONES DE ESCONDER / MOSTRAR PANEL CIDE - MÜRÖNTÖ
-   ========================================== */
-.btn-floating-show-panel {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  z-index: 22;
-  display: none;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1.5px solid #cbd5e1;
-  border-radius: 9999px;
-  padding: 8px 18px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #0f172a;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  user-select: none;
-}
-
-.btn-floating-show-panel:hover {
-  background: #ffffff;
-  border-color: #2563eb;
-  color: #2563eb;
-  transform: translateY(-1px);
-  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.22);
-}
-
-.btn-floating-show-panel:active {
-  transform: scale(0.97);
-}
-
-.show-panel-arrow {
-  color: #2563eb;
-  font-size: 12px;
-}
-
-/* Botón de esconder en el encabezado del panel */
-.btn-hide-panel {
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  color: #475569;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 3px 8px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.btn-hide-panel:hover {
-  background: #e2e8f0;
-  color: #0f172a;
-  border-color: #94a3b8;
-}
-
-/* Botón de esconder rápido en la barra de rol visitante */
-.btn-hide-quick {
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  color: #1d4ed8;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.btn-hide-quick:hover {
-  background: #dbeafe;
-  border-color: #93c5fd;
-}
-
-.mobile-panel-backdrop {
-  display: none;
-}
-
-/* ==========================================
    ADAPTACIÓN RESPONSIVA MÓVIL (Smartphones y Tablets)
    ========================================== */
 @media (max-width: 768px) {
-  /* Botón Flotante para reabrir panel en móvil */
-  .btn-floating-show-panel {
+  #control-panel {
+    position: absolute;
     top: 14px;
     left: 14px;
-    padding: 7px 14px;
-    font-size: 12px;
-  }
-    line-height: 1;
-    color: #2563eb;
-  }
-
-  /* Botón de cerrar dentro del panel */
-  .btn-close-mobile-panel {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    background: #f1f5f9;
-    border: 1px solid #cbd5e1;
-    border-radius: 50%;
-    color: #475569;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.15s;
+    width: min(88vw, 350px);
+    max-height: calc(100vh - 80px);
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
   }
 
-  .btn-close-mobile-panel:hover {
-    background: #e2e8f0;
-    color: #0f172a;
-  }
-
-  /* Fondo translúcido para cerrar menú al tocar afuera */
-  .mobile-panel-backdrop {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.45);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
-    z-index: 35;
-  }
-
-  .mobile-panel-backdrop.active {
-    display: block;
-  }
-
-  /* Panel de Control Principal en Móvil (Cajón deslizable / Drawer) */
-  #control-panel {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: min(88vw, 360px);
-    max-height: 100vh;
-    border-radius: 0 16px 16px 0;
-    z-index: 40;
-    transform: translateX(-105%);
-    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 10px 0 35px rgba(0, 0, 0, 0.3);
-    padding: 18px 16px;
-  }
-
-  #control-panel.mobile-open {
-    transform: translateX(0);
+  #control-panel.collapsed {
+    width: auto;
+    max-height: none;
+    padding: 7px 12px;
+    border-radius: 9999px;
   }
 
   /* Ocultar barra inferior de coordenadas en móvil para ganar espacio táctil */

@@ -14,55 +14,40 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
   <!-- Estilos Personalizados -->
-  <link rel="stylesheet" href="css/main.css?v=34">
+  <link rel="stylesheet" href="css/main.css?v=35">
 </head>
 <body>
 
   <!-- Contenedor del Mapa 3D -->
   <div id="map"></div>
 
-  <!-- Botón Flotante para Reabrir la Ventana CIDE - MÜRÖNTÖ cuando está escondida -->
-  <button id="btnMostrarPanel" class="btn-floating-show-panel" onclick="toggleOcultarPanel(false)" title="Mostrar ventana de CIDE - MÜRÖNTÖ">
-    <span class="show-panel-icon">🏢</span>
-    <span class="show-panel-text">CIDE - MÜRÖNTÖ</span>
-    <span class="show-panel-arrow">▶</span>
-  </button>
-
-  <!-- Fondo translúcido para cerrar menú al tocar afuera en celular -->
-  <div id="mobilePanelBackdrop" class="mobile-panel-backdrop" onclick="toggleOcultarPanel(true)"></div>
-
-  <!-- Panel de Control Flotante -->
+  <!-- Panel de Control Flotante (CIDE - MÜRÖNTÖ) -->
   <aside id="control-panel">
-    <!-- Encabezado de la Plataforma -->
-    <div class="panel-header">
+    <!-- Encabezado de la Plataforma (Clic para colapsar o expandir como la ventana de capas) -->
+    <div class="panel-header" onclick="toggleColapsoControlPanel()" title="Clic para minimizar o expandir">
       <div class="brand-badge">
         <span class="status-dot" title="Sistema Activo"></span>
         <div>
           <h1>CIDE - MÜRÖNTÖ</h1>
         </div>
       </div>
-      <div style="display: flex; align-items: center; gap: 6px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
         <span class="badge-pill">WebGIS 3D</span>
-        <button id="btnEsconderPanel" class="btn-hide-panel" onclick="toggleOcultarPanel(true)" title="Esconder ventana para ver el mapa 3D completo">
-          ◀ Esconder
-        </button>
+        <button id="btnColapsarControlPanel" class="btn-collapse-panel" title="Minimizar ventana">▲</button>
       </div>
     </div>
 
-    <!-- Barra de Perfil / Rol Activo -->
-    <div id="userRoleBar" class="user-role-bar">
-      <div id="roleInfoText" class="role-info-text">
-        <span style="color: #2563eb;">👤 Visitante</span>
-      </div>
-      <div style="display: flex; gap: 6px; align-items: center;">
-        <button id="btnEsconderRolVisitante" class="btn-hide-quick" onclick="toggleOcultarPanel(true)" title="Esconder ventana de CIDE - MÜRÖNTÖ">
-          👁️ Esconder
-        </button>
+    <!-- Cuerpo del Panel (Se oculta al colapsar) -->
+    <div id="controlPanelBody" class="control-panel-body">
+      <!-- Barra de Perfil / Rol Activo -->
+      <div id="userRoleBar" class="user-role-bar">
+        <div id="roleInfoText" class="role-info-text">
+          <span style="color: #2563eb;">👤 Visitante</span>
+        </div>
         <button id="btnCambiarRol" class="btn-change-role" onclick="cerrarSesionUsuario()" title="Cambiar usuario o perfil">
           🔄 Cambiar Rol
         </button>
       </div>
-    </div>
 
     <!-- Buscador Inteligente con Autocompletado -->
     <div class="search-wrapper">
@@ -250,6 +235,7 @@
         <button class="btn-action" onclick="centrarSede()">🎯 Centrar</button>
       </div>
     </div>
+    </div> <!-- Fin #controlPanelBody -->
   </aside>
 
   <!-- Panel Flotante de Estilos y Capas de Visualización (Lado Derecho) -->
@@ -469,10 +455,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <!-- 1. Cargar Datos Locales del Edificio y Oficinas -->
-  <script src="office_data.js?v=34"></script>
+  <script src="office_data.js?v=35"></script>
 
   <!-- 2. Cargar Lógica del Mapa, Capas y Three.js -->
-  <script src="js/map.js?v=34"></script>
+  <script src="js/map.js?v=35"></script>
 
 </body>
 </html>
