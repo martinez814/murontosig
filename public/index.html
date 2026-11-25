@@ -14,7 +14,7 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
   <!-- Estilos Personalizados -->
-  <link rel="stylesheet" href="css/main.css?v=38">
+  <link rel="stylesheet" href="css/main.css?v=39">
 </head>
 <body>
 
@@ -235,14 +235,6 @@
         <button class="btn-action" onclick="centrarSede()">🎯 Centrar</button>
       </div>
     </div>
-
-    <!-- Recorrido Virtual 360° -->
-    <div style="margin-top: 10px;">
-      <div class="section-title">Recorrido Virtual 360°</div>
-      <button class="btn-action" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; border-color: #0284c7; font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);" onclick="abrirVisor360('panoramas/demo360.jpg', 'Vista 360° Demostración', 'Torre Humboldt')">
-        📷 Abrir Visor 360°
-      </button>
-    </div>
     </div> <!-- Fin #controlPanelBody -->
   </aside>
 
@@ -385,6 +377,19 @@
           <input type="text" id="puntoDetalle" placeholder="Ej: Analista de Sistemas, Capacidad 6 pers...">
         </div>
 
+        <!-- Vinculación de Foto 360° (Exclusivo Administrador) -->
+        <div class="form-field">
+          <label for="puntoFoto360">📷 Foto 360° Vinculada (Exclusivo Admin)</label>
+          <select id="puntoFoto360" style="width: 100%; padding: 7px 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px; background: #ffffff;">
+            <option value="">(Ninguna / Sin foto 360°)</option>
+            <option value="panoramas/demo360.jpg">📷 Foto 360° (Auditorio / Sala demo360.jpg)</option>
+            <option value="panoramas/25-11-2026 05.33.48.jpg">📷 Foto 360° (25-11-2026 05.33.48.jpg)</option>
+          </select>
+          <div style="font-size: 10px; color: #64748b; margin-top: 4px;">
+            Al asignar una foto 360°, solo este punto mostrará el botón "📷 Ver Foto 360°" al hacerle clic.
+          </div>
+        </div>
+
         <div class="form-field">
           <label>Coordenadas Seleccionadas</label>
           <div id="puntoCoordsTexto" style="font-size: 11px; color: #64748b; font-family: monospace; background: #f8fafc; padding: 6px; border-radius: 4px; border: 1px solid #e2e8f0;">
@@ -492,7 +497,7 @@
   <script src="office_data.js?v=37"></script>
 
   <!-- 2. Cargar Lógica del Mapa, Capas y Three.js -->
-  <script src="js/map.js?v=38"></script>
+  <script src="js/map.js?v=39"></script>
 
 </body>
 </html>

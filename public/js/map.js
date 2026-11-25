@@ -1286,7 +1286,8 @@ function seleccionarResultado(id) {
         floor: puntoReal.floor,
         altitude: puntoReal.altitude,
         icono: puntoReal.icono,
-        detalle: puntoReal.detalle
+        detalle: puntoReal.detalle,
+        foto360: puntoReal.foto360 || ''
       },
       geometry: { coordinates: puntoReal.coords }
     }, item.coords);
@@ -1416,7 +1417,8 @@ map.on('click', (e) => {
           floor: punto.floor,
           altitude: punto.altitude,
           icono: punto.icono,
-          detalle: punto.detalle
+          detalle: punto.detalle,
+          foto360: punto.foto360 || ''
         },
         geometry: { coordinates: punto.coords }
       }, punto.coords);
@@ -1437,7 +1439,8 @@ map.on('click', (e) => {
           floor: punto3D.floor,
           altitude: punto3D.altitude,
           icono: punto3D.icono,
-          detalle: punto3D.detalle
+          detalle: punto3D.detalle,
+          foto360: punto3D.foto360 || ''
         },
         geometry: { coordinates: punto3D.coords }
       }, punto3D.coords);
@@ -1570,7 +1573,8 @@ function sincronizarCapasDesdeColeccion() {
         pisoNum: floorNum,
         altitude: altZ,
         icono: p.icono,
-        detalle: p.detalle || ''
+        detalle: p.detalle || '',
+        foto360: p.foto360 || ''
       }
     };
 
@@ -1686,6 +1690,15 @@ function mostrarPopupPunto(feature, lngLat) {
     ? `${catTexto} • Altura Z: <b style="color: #2563eb;">+${altZ} m</b>`
     : `${catTexto}`;
 
+  const foto360 = prop.foto360 || '';
+  const botonFoto360Html = foto360 ? `
+    <div style="margin-top: 8px;">
+      <button class="btn-popup-action" style="width: 100%; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; border-color: #0284c7; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 10px; box-shadow: 0 2px 6px rgba(2, 132, 199, 0.35);" onclick="abrirVisor360('${foto360}', '${prop.nombre}', '${prop.floor}')">
+        📷 Ver Foto 360°
+      </button>
+    </div>
+  ` : '';
+
   popupActivo
     .setLngLat(anchor)
     .setHTML(`
@@ -1693,11 +1706,7 @@ function mostrarPopupPunto(feature, lngLat) {
       <div class="popup-subtitle">${subtituloHtml}</div>
       ${prop.detalle ? `<div class="popup-detail">${prop.detalle}</div>` : ''}
       <div class="popup-badge ${badgeClass}">${prop.floor}</div>
-      <div style="margin-top: 8px;">
-        <button class="btn-popup-action" style="width: 100%; background: #0284c7; color: #ffffff; border-color: #0284c7; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 5px 8px;" onclick="abrirVisor360('panoramas/demo360.jpg', '${prop.nombre}', '${prop.floor}')">
-          📷 Ver Foto 360°
-        </button>
-      </div>
+      ${botonFoto360Html}
       ${usuarioRolActual === 'admin' ? `
         <div style="display: flex; gap: 5px; margin-top: 8px; border-top: 1px solid #e2e8f0; padding-top: 8px;">
           <button class="btn-popup-action" onclick="abrirEditorPunto(${prop.id})">✏️ Editar</button>
@@ -1781,6 +1790,9 @@ function abrirModalCrearPunto(coords) {
   document.getElementById('puntoCategoria').value = 'puesto';
   document.getElementById('puntoIcono').value = '💻';
   document.getElementById('puntoCoordsTexto').textContent = `Long: ${coords[0]} | Lat: ${coords[1]}`;
+  if (document.getElementById('puntoFoto360')) {
+    document.getElementById('puntoFoto360').value = '';
+  }
 
   const altDefecto = pisoDefecto === 'Mezzanina' ? 3.6 : 0.8;
   fijarAlturaRapida(altDefecto);
@@ -1806,6 +1818,9 @@ function abrirEditorPunto(id) {
   document.getElementById('puntoCategoria').value = punto.categoria;
   document.getElementById('puntoIcono').value = punto.icono || '📍';
   document.getElementById('puntoCoordsTexto').textContent = `Long: ${punto.coords[0]} | Lat: ${punto.coords[1]}`;
+  if (document.getElementById('puntoFoto360')) {
+    document.getElementById('puntoFoto360').value = punto.foto360 || '';
+  }
 
   const alt = typeof punto.altitude === 'number' ? punto.altitude : (punto.floor === 'Mezzanina' ? 3.6 : 0.8);
   fijarAlturaRapida(alt);
@@ -1914,6 +1929,8 @@ function guardarPuntoModal() {
   const categoria = document.getElementById('puntoCategoria').value;
   const icono = document.getElementById('puntoIcono').value || '📍';
   const detalle = document.getElementById('puntoDetalle').value.trim();
+  const foto360Input = document.getElementById('puntoFoto360');
+  const foto360 = foto360Input ? foto360Input.value.trim() : '';
 
   const elevacion = parseFloat(document.getElementById('puntoElevacion').value);
   const altitude = isNaN(elevacion) ? (floor === 'Mezzanina' ? 3.6 : 0.8) : Math.round(elevacion * 10) / 10;
@@ -1927,6 +1944,7 @@ function guardarPuntoModal() {
       punto.altitude = altitude;
       punto.icono = icono;
       punto.detalle = detalle;
+      punto.foto360 = foto360;
     }
   } else {
     const nuevoPunto = {
@@ -1937,6 +1955,7 @@ function guardarPuntoModal() {
       altitude,
       icono,
       detalle,
+      foto360,
       coords: [lng, lat]
     };
     coleccionPuntos.push(nuevoPunto);
@@ -1999,7 +2018,8 @@ function generarCodigoOfficeData() {
         floor: ${JSON.stringify(p.floor)},
         altitude: ${typeof p.altitude === 'number' ? p.altitude : (p.floor === 'Mezzanina' ? 3.6 : 0.8)},
         icono: ${JSON.stringify(p.icono || '📍')},
-        detalle: ${JSON.stringify(p.detalle || '')}
+        detalle: ${JSON.stringify(p.detalle || '')},
+        foto360: ${JSON.stringify(p.foto360 || '')}
       }
     }`;
 
@@ -2549,7 +2569,8 @@ function aplicarRolUsuario(rol) {
           floor: p.floor,
           altitude: p.altitude,
           icono: p.icono,
-          detalle: p.detalle
+          detalle: p.detalle,
+          foto360: p.foto360 || ''
         },
         geometry: { coordinates: p.coords }
       }, p.coords);
@@ -2619,12 +2640,13 @@ function inicializarVisor360() {
   const geometry = new THREE.SphereGeometry(500, 60, 40);
   geometry.scale(-1, 1, 1); // Mirar desde adentro hacia afuera
 
-  const material = new THREE.MeshBasicMaterial({ color: 0x0f172a });
+  const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
   visor360SphereMesh = new THREE.Mesh(geometry, material);
   visor360Scene.add(visor360SphereMesh);
 
   // 4. Renderer WebGL para el visor
   visor360Renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+  visor360Renderer.outputEncoding = THREE.sRGBEncoding;
   visor360Renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   visor360Renderer.setSize(width, height);
   container.appendChild(visor360Renderer.domElement);
@@ -2757,10 +2779,12 @@ function abrirVisor360(urlImagen, titulo, subtitulo) {
     urlImagen,
     (texture) => {
       texture.mapping = THREE.EquirectangularReflectionMapping;
+      texture.encoding = THREE.sRGBEncoding;
       if (visor360SphereMesh) {
         if (visor360SphereMesh.material.map) {
           visor360SphereMesh.material.map.dispose();
         }
+        visor360SphereMesh.material.color.set(0xffffff);
         visor360SphereMesh.material.map = texture;
         visor360SphereMesh.material.needsUpdate = true;
       }
