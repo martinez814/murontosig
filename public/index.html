@@ -14,7 +14,7 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
   <!-- Estilos Personalizados -->
-  <link rel="stylesheet" href="css/main.css?v=37">
+  <link rel="stylesheet" href="css/main.css?v=38">
 </head>
 <body>
 
@@ -235,6 +235,14 @@
         <button class="btn-action" onclick="centrarSede()">🎯 Centrar</button>
       </div>
     </div>
+
+    <!-- Recorrido Virtual 360° -->
+    <div style="margin-top: 10px;">
+      <div class="section-title">Recorrido Virtual 360°</div>
+      <button class="btn-action" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; border-color: #0284c7; font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);" onclick="abrirVisor360('panoramas/demo360.jpg', 'Vista 360° Demostración', 'Torre Humboldt')">
+        📷 Abrir Visor 360°
+      </button>
+    </div>
     </div> <!-- Fin #controlPanelBody -->
   </aside>
 
@@ -391,6 +399,32 @@
     </div>
   </div>
 
+  <!-- Modal Visor Inmersivo 360° (Three.js) -->
+  <div id="modalVisor360" class="modal-visor-360" style="display: none;">
+    <div class="visor-360-header">
+      <div class="visor-360-info">
+        <span class="visor-360-badge">📷 VISTA 360° INMERSIVA</span>
+        <h3 id="visor360Titulo">Vista Panorámica</h3>
+        <span id="visor360Subtitulo" class="visor-360-sub">Torre Humboldt</span>
+      </div>
+      <div class="visor-360-controls">
+        <button id="btn360AutoGiro" class="btn-visor-control" title="Pausar / Reanudar giro automático" onclick="toggleAutoGiro360()">🔄 Auto Giro</button>
+        <button id="btn360ZoomIn" class="btn-visor-control" title="Acercar" onclick="ajustarZoom360(-10)">🔍 +</button>
+        <button id="btn360ZoomOut" class="btn-visor-control" title="Alejar" onclick="ajustarZoom360(10)">🔍 -</button>
+        <button class="btn-visor-close" title="Cerrar visor 360°" onclick="cerrarVisor360()">✕ Cerrar</button>
+      </div>
+    </div>
+    <div id="canvasContainer360" class="visor-360-canvas-container">
+      <div id="visor360Cargando" class="visor-360-loading">
+        <div class="visor-spinner"></div>
+        <span>Cargando imagen panorámica 360°...</span>
+      </div>
+    </div>
+    <div class="visor-360-footer-hint">
+      <span>🖱️ Arrastra con el ratón o desliza con el dedo para explorar en 360° • Usa la rueda para hacer zoom</span>
+    </div>
+  </div>
+
   <!-- Ventana de Inicio Institucional / Acceso al Sistema -->
   <div id="loginOverlay" class="login-overlay" style="display: none;">
     <div class="login-card">
@@ -458,7 +492,7 @@
   <script src="office_data.js?v=37"></script>
 
   <!-- 2. Cargar Lógica del Mapa, Capas y Three.js -->
-  <script src="js/map.js?v=37"></script>
+  <script src="js/map.js?v=38"></script>
 
 </body>
 </html>

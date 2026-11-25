@@ -1693,14 +1693,19 @@ function mostrarPopupPunto(feature, lngLat) {
       <div class="popup-subtitle">${subtituloHtml}</div>
       ${prop.detalle ? `<div class="popup-detail">${prop.detalle}</div>` : ''}
       <div class="popup-badge ${badgeClass}">${prop.floor}</div>
+      <div style="margin-top: 8px;">
+        <button class="btn-popup-action" style="width: 100%; background: #0284c7; color: #ffffff; border-color: #0284c7; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 5px 8px;" onclick="abrirVisor360('panoramas/demo360.jpg', '${prop.nombre}', '${prop.floor}')">
+          📷 Ver Foto 360°
+        </button>
+      </div>
       ${usuarioRolActual === 'admin' ? `
-        <div style="display: flex; gap: 5px; margin-top: 10px; border-top: 1px solid #e2e8f0; padding-top: 8px;">
+        <div style="display: flex; gap: 5px; margin-top: 8px; border-top: 1px solid #e2e8f0; padding-top: 8px;">
           <button class="btn-popup-action" onclick="abrirEditorPunto(${prop.id})">✏️ Editar</button>
           <button class="btn-popup-action" onclick="iniciarMoverPunto(${prop.id})">📍 Mover</button>
           <button class="btn-popup-action btn-popup-danger" onclick="eliminarPunto(${prop.id})">🗑️ Borrar</button>
         </div>
       ` : `
-        <div style="margin-top: 8px; border-top: 1px solid #e2e8f0; padding-top: 6px; font-size: 11px; color: #64748b; display: flex; align-items: center; justify-content: space-between;">
+        <div style="margin-top: 6px; border-top: 1px solid #e2e8f0; padding-top: 6px; font-size: 11px; color: #64748b; display: flex; align-items: center; justify-content: space-between;">
           <span>👁️ Modo visualización</span>
           <span style="font-size: 9px; background: #f1f5f9; color: #475569; padding: 2px 6px; border-radius: 4px; font-weight: 600;">Solo Lectura</span>
         </div>
@@ -2573,3 +2578,218 @@ window.colapsarControlPanel = colapsarControlPanel;
 window.togglePanelMovil = togglePanelMovil;
 window.autoCerrarPanelEnMovil = autoCerrarPanelEnMovil;
 window.toggleOcultarPanel = toggleOcultarPanel;
+
+// ==========================================
+// VISOR INMERSIVO 360° NATIVO CON THREE.JS
+// ==========================================
+let visor360Scene = null;
+let visor360Camera = null;
+let visor360Renderer = null;
+let visor360SphereMesh = null;
+let visor360AnimId = null;
+
+let visor360IsUserInteracting = false;
+let visor360OnPointerDownPointerX = 0;
+let visor360OnPointerDownPointerY = 0;
+let visor360OnPointerDownLon = 0;
+let visor360OnPointerDownLat = 0;
+let visor360Lon = 0;
+let visor360Lat = 0;
+let visor360Fov = 75;
+let visor360AutoGiro = true;
+let visor360Target = null;
+
+function inicializarVisor360() {
+  if (visor360Renderer) return;
+
+  const container = document.getElementById('canvasContainer360');
+  if (!container) return;
+
+  const width = container.clientWidth || window.innerWidth;
+  const height = container.clientHeight || window.innerHeight;
+
+  // 1. Escena Three.js independiente para la esfera 360
+  visor360Scene = new THREE.Scene();
+
+  // 2. Cámara interna de perspectiva
+  visor360Camera = new THREE.PerspectiveCamera(visor360Fov, width / height, 1, 1100);
+  visor360Target = new THREE.Vector3();
+
+  // 3. Geometría esférica invertida (radio 500)
+  const geometry = new THREE.SphereGeometry(500, 60, 40);
+  geometry.scale(-1, 1, 1); // Mirar desde adentro hacia afuera
+
+  const material = new THREE.MeshBasicMaterial({ color: 0x0f172a });
+  visor360SphereMesh = new THREE.Mesh(geometry, material);
+  visor360Scene.add(visor360SphereMesh);
+
+  // 4. Renderer WebGL para el visor
+  visor360Renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+  visor360Renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  visor360Renderer.setSize(width, height);
+  container.appendChild(visor360Renderer.domElement);
+
+  // 5. Manejadores de interacción (Ratón y Pantallas Táctiles)
+  container.addEventListener('pointerdown', onVisor360PointerDown, false);
+  document.addEventListener('pointermove', onVisor360PointerMove, false);
+  document.addEventListener('pointerup', onVisor360PointerUp, false);
+  container.addEventListener('wheel', onVisor360Wheel, { passive: false });
+  window.addEventListener('resize', onVisor360WindowResize, false);
+}
+
+function onVisor360PointerDown(event) {
+  if (event.isPrimary === false) return;
+  visor360IsUserInteracting = true;
+  visor360OnPointerDownPointerX = event.clientX;
+  visor360OnPointerDownPointerY = event.clientY;
+  visor360OnPointerDownLon = visor360Lon;
+  visor360OnPointerDownLat = visor360Lat;
+}
+
+function onVisor360PointerMove(event) {
+  if (event.isPrimary === false || !visor360IsUserInteracting) return;
+  visor360Lon = (visor360OnPointerDownPointerX - event.clientX) * 0.15 + visor360OnPointerDownLon;
+  visor360Lat = (event.clientY - visor360OnPointerDownPointerY) * 0.15 + visor360OnPointerDownLat;
+}
+
+function onVisor360PointerUp(event) {
+  if (event.isPrimary === false) return;
+  visor360IsUserInteracting = false;
+}
+
+function onVisor360Wheel(event) {
+  event.preventDefault();
+  ajustarZoom360(event.deltaY * 0.05);
+}
+
+function ajustarZoom360(delta) {
+  visor360Fov = Math.max(30, Math.min(100, visor360Fov + delta));
+  if (visor360Camera) {
+    visor360Camera.fov = visor360Fov;
+    visor360Camera.updateProjectionMatrix();
+  }
+}
+
+function toggleAutoGiro360() {
+  visor360AutoGiro = !visor360AutoGiro;
+  const btn = document.getElementById('btn360AutoGiro');
+  if (btn) {
+    if (visor360AutoGiro) {
+      btn.classList.add('active');
+      btn.textContent = '🔄 Auto Giro: ON';
+    } else {
+      btn.classList.remove('active');
+      btn.textContent = '⏸️ Auto Giro: OFF';
+    }
+  }
+}
+
+function onVisor360WindowResize() {
+  const container = document.getElementById('canvasContainer360');
+  if (!container || !visor360Camera || !visor360Renderer) return;
+  const width = container.clientWidth || window.innerWidth;
+  const height = container.clientHeight || window.innerHeight;
+  visor360Camera.aspect = width / height;
+  visor360Camera.updateProjectionMatrix();
+  visor360Renderer.setSize(width, height);
+}
+
+function animarVisor360() {
+  const modal = document.getElementById('modalVisor360');
+  if (!modal || modal.style.display === 'none') {
+    if (visor360AnimId) cancelAnimationFrame(visor360AnimId);
+    visor360AnimId = null;
+    return;
+  }
+
+  visor360AnimId = requestAnimationFrame(animarVisor360);
+
+  if (!visor360IsUserInteracting && visor360AutoGiro) {
+    visor360Lon += 0.08; // Giro panorámico automático constante
+  }
+
+  visor360Lat = Math.max(-85, Math.min(85, visor360Lat));
+  const phi = THREE.MathUtils.degToRad(90 - visor360Lat);
+  const theta = THREE.MathUtils.degToRad(visor360Lon);
+
+  visor360Target.x = 500 * Math.sin(phi) * Math.cos(theta);
+  visor360Target.y = 500 * Math.cos(phi);
+  visor360Target.z = 500 * Math.sin(phi) * Math.sin(theta);
+
+  visor360Camera.lookAt(visor360Target);
+  visor360Renderer.render(visor360Scene, visor360Camera);
+}
+
+function abrirVisor360(urlImagen, titulo, subtitulo) {
+  const modal = document.getElementById('modalVisor360');
+  const titElem = document.getElementById('visor360Titulo');
+  const subElem = document.getElementById('visor360Subtitulo');
+  const loading = document.getElementById('visor360Cargando');
+  const btnAuto = document.getElementById('btn360AutoGiro');
+
+  if (!modal) return;
+
+  if (titElem) titElem.textContent = titulo || 'Vista Panorámica 360°';
+  if (subElem) subElem.textContent = subtitulo || 'Torre Humboldt • MÜRÖNTÖ';
+  if (loading) loading.style.display = 'flex';
+  if (btnAuto) {
+    btnAuto.classList.add('active');
+    btnAuto.textContent = '🔄 Auto Giro: ON';
+  }
+
+  modal.style.display = 'flex';
+  inicializarVisor360();
+  onVisor360WindowResize();
+
+  // Reiniciar variables de vista
+  visor360Lon = 0;
+  visor360Lat = 0;
+  visor360Fov = 75;
+  visor360AutoGiro = true;
+  if (visor360Camera) {
+    visor360Camera.fov = visor360Fov;
+    visor360Camera.updateProjectionMatrix();
+  }
+
+  // Cargar imagen con el TextureLoader de Three.js
+  const loader = new THREE.TextureLoader();
+  loader.load(
+    urlImagen,
+    (texture) => {
+      texture.mapping = THREE.EquirectangularReflectionMapping;
+      if (visor360SphereMesh) {
+        if (visor360SphereMesh.material.map) {
+          visor360SphereMesh.material.map.dispose();
+        }
+        visor360SphereMesh.material.map = texture;
+        visor360SphereMesh.material.needsUpdate = true;
+      }
+      if (loading) loading.style.display = 'none';
+      if (!visor360AnimId) animarVisor360();
+    },
+    undefined,
+    (err) => {
+      console.error('Error al cargar textura 360:', err);
+      if (loading) {
+        loading.innerHTML = '<span style="color: #f87171; text-align: center; padding: 20px;">⚠️ No se pudo cargar la imagen panorámica. Verifica que el archivo exista en public/panoramas/</span><button class="btn-visor-control" style="margin-top: 10px;" onclick="cerrarVisor360()">Volver al mapa</button>';
+      }
+    }
+  );
+
+  if (!visor360AnimId) animarVisor360();
+}
+
+function cerrarVisor360() {
+  const modal = document.getElementById('modalVisor360');
+  if (modal) modal.style.display = 'none';
+  if (visor360AnimId) {
+    cancelAnimationFrame(visor360AnimId);
+    visor360AnimId = null;
+  }
+}
+
+// Exportar funciones del visor 360 a window
+window.abrirVisor360 = abrirVisor360;
+window.cerrarVisor360 = cerrarVisor360;
+window.toggleAutoGiro360 = toggleAutoGiro360;
+window.ajustarZoom360 = ajustarZoom360;
