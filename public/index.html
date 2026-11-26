@@ -461,13 +461,20 @@
           
           <div class="admin-password-box">
             <input 
+              type="email" 
+              id="adminEmailInput" 
+              placeholder="Correo administrador..." 
+              autocomplete="email"
+              onkeydown="if(event.key === 'Enter') intentarLoginAdmin()"
+            >
+            <input 
               type="password" 
               id="adminPasswordInput" 
               placeholder="Ingresa la contraseña..." 
               autocomplete="current-password"
               onkeydown="if(event.key === 'Enter') intentarLoginAdmin()"
             >
-            <button class="btn-role btn-admin" onclick="intentarLoginAdmin()">
+            <button id="btnLoginAdmin" class="btn-role btn-admin" onclick="intentarLoginAdmin()">
               🔑 Acceder
             </button>
           </div>
@@ -489,15 +496,16 @@
     <button id="copy-coords-btn">Copiar</button>
   </div>
 
-  <!-- Firebase App y Cloud Firestore (Base de Datos en Tiempo Real en la Nube) -->
+  <!-- Firebase App, Auth y Cloud Firestore (Autenticación y Base de Datos en Tiempo Real) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <!-- 1. Cargar Datos Locales del Edificio y Oficinas -->
   <script src="office_data.js?v=37"></script>
 
   <!-- 2. Cargar Lógica del Mapa, Capas y Three.js -->
-  <script src="js/map.js?v=39"></script>
+  <script src="js/map.js?v=40"></script>
 
 </body>
 </html>

@@ -23,14 +23,18 @@ const firebaseConfig = {
 };
 
 let db = null;
+let auth = null;
 let firebaseHabilitado = false;
 
 try {
   if (typeof firebase !== 'undefined' && firebase.initializeApp) {
     firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
+    if (typeof firebase.auth === 'function') {
+      auth = firebase.auth();
+    }
     firebaseHabilitado = true;
-    console.log('✓ Conectado exitosamente a Google Cloud Firestore');
+    console.log('✓ Conectado exitosamente a Google Cloud Firestore y Firebase Auth');
   }
 } catch (e) {
   console.warn('Firebase no inicializado (modo local/offline):', e);
@@ -41,9 +45,6 @@ const STORAGE_KEY_BASE_ETERNA = 'muronto_base_eterna_v2';
 const STORAGE_KEY_LEGACY = 'muronto_calibracion_3d_v1';
 const STORAGE_KEY_PUNTOS = 'muronto_puntos_usuario_v1';
 const STORAGE_KEY_ROL = 'muronto_usuario_rol_v1';
-
-// Clave de acceso del Administrador (configurable por código)
-const ADMIN_PASSWORD_CORRECTA = '12345';
 
 // Rol activo del usuario: 'admin' | 'visitante' | null
 let usuarioRolActual = null;
@@ -906,6 +907,7 @@ async function guardarCalibracion() {
 
   // 2. Sincronizar en la Nube (Google Cloud Firestore) para todos los usuarios
   let guardadoEnNube = false;
+  let errorPermisoNube = false;
   if (db && firebaseHabilitado) {
     try {
       await db.collection('edificio').doc('calibracion').set({
@@ -915,6 +917,7 @@ async function guardarCalibracion() {
       guardadoEnNube = true;
       console.log('✓ Calibración guardada exitosamente en la nube (Firestore)');
     } catch (e) {
+      errorPermisoNube = e && e.code === 'permission-denied';
       console.warn('Error guardando calibración en Firestore:', e);
     }
   }
@@ -924,10 +927,12 @@ async function guardarCalibracion() {
   const btn = document.getElementById('btnGuardarCalibracion');
   if (feedback) {
     feedback.style.display = 'block';
-    feedback.style.color = '#166534';
+    feedback.style.color = errorPermisoNube ? '#b45309' : '#166534';
     feedback.textContent = guardadoEnNube
       ? '⭐ ¡Calibración guardada en la Nube con éxito!'
-      : '⭐ ¡Fijado como tu nuevo Reinicio Eterno!';
+      : (errorPermisoNube
+        ? '⚠️ Guardado local; sin permiso en Firestore (verifica sesión admin).'
+        : '⭐ ¡Fijado como tu nuevo Reinicio Eterno!');
     setTimeout(() => {
       feedback.style.display = 'none';
     }, 4000);
@@ -1941,7 +1946,11 @@ async function guardarPuntosEnNube() {
     });
     console.log(`✓ Sincronización en la Nube: ${coleccionPuntos.length} puntos guardados en Firestore.`);
   } catch (err) {
-    console.warn('Aviso al guardar puntos en Firestore (verifica que iniciaste Firestore en modo prueba):', err);
+    if (err && err.code === 'permission-denied') {
+      console.warn('Permiso denegado en Firestore al guardar puntos. Inicia sesión como Administrador autenticado.');
+    } else {
+      console.warn('Aviso al guardar puntos en Firestore:', err);
+    }
   }
 }
 
@@ -2265,18 +2274,75 @@ window.sincronizarSlidersUI = sincronizarSlidersUI;
 window.guardarPuntosEnNube = guardarPuntosEnNube;
 
 // ==========================================
-// SISTEMA DE USUARIOS Y ROLES (ADMIN / VISITANTE)
+// SISTEMA DE USUARIOS Y ROLES (ADMIN CON FIREBASE AUTH / VISITANTE)
 // ==========================================
+let authListenerRegistrado = false;
+
+function traducirErrorFirebaseAuth(err) {
+  const code = err && err.code ? err.code : '';
+  switch (code) {
+    case 'auth/invalid-email':
+      return '⚠️ El correo electrónico no tiene un formato válido.';
+    case 'auth/user-disabled':
+      return '⚠️ Esta cuenta de administrador está deshabilitada.';
+    case 'auth/user-not-found':
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential':
+      return '⚠️ Correo o contraseña incorrectos.';
+    case 'auth/too-many-requests':
+      return '⚠️ Demasiados intentos fallidos. Espera unos minutos e intenta de nuevo.';
+    case 'auth/network-request-failed':
+      return '⚠️ Error de red al conectar con Firebase Authentication.';
+    default:
+      return '⚠️ No se pudo iniciar sesión. Verifica tus credenciales.';
+  }
+}
+
 function inicializarSistemaUsuarios() {
+  if (auth) {
+    if (authListenerRegistrado) return;
+    authListenerRegistrado = true;
+    auth.onAuthStateChanged((user) => {
+      if (user && !user.isAnonymous) {
+        usuarioRolActual = 'admin';
+        try {
+          sessionStorage.setItem(STORAGE_KEY_ROL, 'admin');
+        } catch (e) {}
+        aplicarRolUsuario('admin');
+        cerrarVentanaLogin();
+        return;
+      }
+
+      let rolGuardado = null;
+      try {
+        rolGuardado = sessionStorage.getItem(STORAGE_KEY_ROL);
+        if (rolGuardado === 'admin') {
+          // No permitir rol admin en sessionStorage sin sesión Firebase Auth vigente
+          sessionStorage.removeItem(STORAGE_KEY_ROL);
+          rolGuardado = null;
+        }
+      } catch (e) {}
+
+      if (rolGuardado === 'visitante') {
+        aplicarRolUsuario('visitante');
+        cerrarVentanaLogin();
+        toggleColapsoControlPanel(true);
+      } else {
+        mostrarVentanaLogin();
+      }
+    });
+    return;
+  }
+
+  // Fallback si Firebase Auth no cargó (ej. modo offline sin CDN)
   try {
     const rolGuardado = sessionStorage.getItem(STORAGE_KEY_ROL);
-    if (rolGuardado === 'admin' || rolGuardado === 'visitante') {
-      aplicarRolUsuario(rolGuardado);
+    if (rolGuardado === 'visitante') {
+      aplicarRolUsuario('visitante');
       cerrarVentanaLogin();
-      if (rolGuardado === 'visitante') {
-        toggleColapsoControlPanel(true);
-      }
+      toggleColapsoControlPanel(true);
     } else {
+      sessionStorage.removeItem(STORAGE_KEY_ROL);
       mostrarVentanaLogin();
     }
   } catch (e) {
@@ -2291,9 +2357,12 @@ function mostrarVentanaLogin() {
   const overlay = document.getElementById('loginOverlay');
   if (overlay) {
     overlay.style.display = 'flex';
+    const emailInput = document.getElementById('adminEmailInput');
     const pwd = document.getElementById('adminPasswordInput');
-    if (pwd) {
-      pwd.value = '';
+    if (pwd) pwd.value = '';
+    if (emailInput) {
+      setTimeout(() => emailInput.focus(), 150);
+    } else if (pwd) {
       setTimeout(() => pwd.focus(), 150);
     }
     const err = document.getElementById('adminLoginError');
@@ -2323,13 +2392,42 @@ function iniciarSesionVisitante() {
   toggleColapsoControlPanel(true);
 }
 
-function intentarLoginAdmin() {
-  const input = document.getElementById('adminPasswordInput');
+async function intentarLoginAdmin() {
+  const emailInput = document.getElementById('adminEmailInput');
+  const pwdInput = document.getElementById('adminPasswordInput');
+  const btnLogin = document.getElementById('btnLoginAdmin');
   const err = document.getElementById('adminLoginError');
-  const clave = input ? input.value.trim() : '';
 
-  if (clave === ADMIN_PASSWORD_CORRECTA) {
-    if (err) err.style.display = 'none';
+  const correo = emailInput ? emailInput.value.trim() : '';
+  const clave = pwdInput ? pwdInput.value : '';
+
+  const mostrarError = (mensaje) => {
+    if (err) {
+      err.style.display = 'block';
+      err.textContent = mensaje;
+    }
+  };
+
+  if (!correo || !clave) {
+    mostrarError('⚠️ Ingresa tu correo y contraseña de administrador.');
+    if (!correo && emailInput) emailInput.focus();
+    else if (pwdInput) pwdInput.focus();
+    return;
+  }
+
+  if (!auth) {
+    mostrarError('⚠️ Servicio de autenticación no disponible sin conexión a Firebase.');
+    return;
+  }
+
+  if (err) err.style.display = 'none';
+  if (btnLogin) {
+    btnLogin.disabled = true;
+    btnLogin.textContent = '⏳ Verificando...';
+  }
+
+  try {
+    await auth.signInWithEmailAndPassword(correo, clave);
     usuarioRolActual = 'admin';
     try {
       sessionStorage.setItem(STORAGE_KEY_ROL, 'admin');
@@ -2338,23 +2436,32 @@ function intentarLoginAdmin() {
     cerrarVentanaLogin();
     // Expandir panel para que el administrador tenga acceso directo a las herramientas
     toggleColapsoControlPanel(false);
-  } else {
-    if (err) {
-      err.style.display = 'block';
-      err.textContent = '⚠️ Contraseña incorrecta. Intenta nuevamente.';
+  } catch (authErr) {
+    mostrarError(traducirErrorFirebaseAuth(authErr));
+    if (pwdInput) {
+      pwdInput.value = '';
+      pwdInput.focus();
     }
-    if (input) {
-      input.value = '';
-      input.focus();
+  } finally {
+    if (btnLogin) {
+      btnLogin.disabled = false;
+      btnLogin.textContent = '🔑 Acceder';
     }
   }
 }
 
-function cerrarSesionUsuario() {
+async function cerrarSesionUsuario() {
   usuarioRolActual = null;
   try {
     sessionStorage.removeItem(STORAGE_KEY_ROL);
   } catch (e) {}
+  if (auth && auth.currentUser) {
+    try {
+      await auth.signOut();
+    } catch (e) {
+      console.warn('Error al cerrar sesión en Firebase Auth:', e);
+    }
+  }
   cancelarAccionEditor();
   if (popupActivo) popupActivo.remove();
   mostrarVentanaLogin();
@@ -2369,7 +2476,9 @@ function aplicarRolUsuario(rol) {
   const lblInterior = document.getElementById('labelModeloInterior');
 
   if (rol === 'admin') {
+    const adminEmail = auth && auth.currentUser && auth.currentUser.email ? auth.currentUser.email : '';
     if (roleText) {
+      roleText.title = adminEmail ? `Sesión: ${adminEmail}` : 'Administrador autenticado';
       roleText.innerHTML = '<span style="color: #059669; font-weight: 700;">👑 Administrador</span> <span style="font-size: 9px; background: #dcfce7; color: #15803d; padding: 2px 6px; border-radius: 4px; font-weight: 700;">Edición Total</span>';
     }
     if (seccionAdmin) {

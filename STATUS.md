@@ -1,7 +1,7 @@
 # STATUS.md — Sistema WebGIS 3D (CIDE-MÜRÖNTÖ)
 
 > **Última actualización:** 2026-11-26  
-> **Modo de operación:** `Modo Agente` (ejecutando Fase 1)  
+> **Modo de operación:** `Modo Planificador` (Fase 1 completada; esperando confirmación para Fase 2)  
 > **Metodología:** C://GHOST (regido por `.agents/AGENTS.md`)
 
 ---
@@ -29,27 +29,26 @@ Desarrollar un **Sistema de Información Geográfica (WebGIS 3D)** para la **ges
   - Sistema de roles (`Visitante` / `Administrador`), filtros por nivel (`Todos`, `PB`, `Mezzanina`), buscador con autocompletado y gestor de puntos espaciales.
   - Visor inmersivo 360° integrado con Three.js y vinculación de fotos panorámicas para administrador.
   - Barra inspectora de coordenadas en esquina inferior derecha.
-- **Hallazgos críticos a resolver:**
-  1. **Seguridad:** Contraseña de administrador (`ADMIN_PASSWORD_CORRECTA` en `public/js/map.js`) expuesta en cliente; falta **Firebase Auth** y reglas de seguridad en Firestore.
-  2. **Limpieza y coherencia:** Duplicado de `calibracion.json` en raíz vs. `public/data/calibracion.json`, y `public/data/edificio.geojson` con 3 niveles genéricos frente a los 2 niveles reales (`PB` y `Mezzanina`).
-  3. **Mantenibilidad:** `public/js/map.js` concentra toda la lógica en un solo archivo monolítico (2,658 líneas).
-  4. **Calidad y pruebas:** `package.json` carece de scripts de linting y verificación de datos.
+- **Hallazgos críticos resueltos y pendientes:**
+  1. **Seguridad (`Resuelto en código`):** Eliminada `ADMIN_PASSWORD_CORRECTA` del cliente e integrado **Firebase Authentication** (`firebase-auth-compat.js` + `firestore.rules`). *Pendiente operativo en Firebase Console:* habilitar proveedor Correo/Contraseña, crear usuario admin y publicar `firestore.rules`.
+  2. **Limpieza y coherencia (`Parcialmente resuelto`):** Eliminado duplicado `./calibracion.json` en raíz y simplificado `server.js` a servidor estático local; sigue pendiente alinear `public/data/edificio.geojson` (3 niveles genéricos) con `PB` y `Mezzanina`.
+  3. **Mantenibilidad:** `public/js/map.js` concentra toda la lógica en un solo archivo monolítico (Fase 2).
+  4. **Calidad y pruebas:** `package.json` carece de scripts de linting y verificación de datos (Fase 4).
 
 ---
 
 ## 3. Tarea Activa
 
-- **[PLAN-01] Plan Estratégico Ajustado (Modo Planificador):**
-  - Decisiones de infraestructura (`Vercel + Firebase`) y alcance (`solo edificio: PB y Mezzanina`) registradas.
-  - Esperando confirmación del usuario para pasar a `Modo Agente` y ejecutar la **Fase 1** (respaldo Git, limpieza de duplicados y migración de autenticación a Firebase Auth).
+- **[ARQ-02] Fase 2 — Modularización de `public/js/map.js` (Pendiente de aprobación):**
+  - Fase 1 completada y verificada sintácticamente. Esperando validación del usuario para iniciar la separación modular de `public/js/map.js`.
 
 ---
 
 ## 4. Backlog Priorizado
 
-- [ ] **[SEG-01] Fase 1 — Firebase Auth + Reglas Firestore:** Incorporar `firebase-auth-compat.js` en `public/index.html`, reemplazar `ADMIN_PASSWORD_CORRECTA` en `public/js/map.js` por login real con correo/contraseña de Firebase Auth y documentar las `firestore.rules` para proteger escrituras en `edificio/*`.
-- [ ] **[CLN-01] Fase 1 — Saneamiento de configuración y respaldos:** Consolidar `public/data/calibracion.json` (evaluar retiro de `./calibracion.json` raíz), dejar `server.js` claramente como servidor estático de desarrollo local y hacer commit de respaldo (`Protocolo 7`).
-- [ ] **[ARQ-02] Fase 2 — Modularización de `public/js/map.js`:** Separar el monolito de 2,658 líneas en módulos ES cohesivos (config/firebase, escena 3D, calibración, CRUD espacial, visor 360°, buscador/UI).
+- [x] **[SEG-01] Fase 1 — Firebase Auth + Reglas Firestore:** Incorporado `firebase-auth-compat.js` en `public/index.html`, reemplazado login estático en `public/js/map.js` por `auth.signInWithEmailAndPassword` + `onAuthStateChanged` y creado `firestore.rules`.
+- [x] **[CLN-01] Fase 1 — Saneamiento de configuración y respaldos:** Eliminado `./calibracion.json` duplicado en raíz, simplificado `server.js` a servidor estático de desarrollo local y respaldada gobernanza en Git.
+- [ ] **[ARQ-02] Fase 2 — Modularización de `public/js/map.js`:** Separar el monolito en módulos ES cohesivos (config/firebase, escena 3D, calibración, CRUD espacial, visor 360°, buscador/UI).
 - [ ] **[GIS-01] Fase 3 — Gestión de espacios estructurales del edificio (`PB` y `Mezzanina`):** Ampliar modelo de datos en Firestore/GeoJSON para registrar polígonos/zonas estructurales del edificio (áreas, capacidad/aforo, tipo estructural, estado, nivel y panoramas 360° asociados) y alinear `public/data/edificio.geojson` con `PB` y `Mezzanina`.
 - [ ] **[QA-01] Fase 4 — Verificación y optimización de activos:** Añadir scripts de validación/lint en `package.json`, normalizar nombres en `public/panoramas/` y optimizar carga de `.glb` y texturas 360° para Vercel.
 
@@ -57,7 +56,8 @@ Desarrollar un **Sistema de Información Geográfica (WebGIS 3D)** para la **ges
 
 ## 5. Historial de Cambios
 
-- **2026-11-26:** Creación de `STATUS.md` base conforme al `Protocolo 0` y `Protocolo 10` (Semilla del Edén) de `.agents/AGENTS.md`, tras auditar la estructura actual del proyecto WebGIS 3D.
+- **2026-11-26 (Fase 1):** Integración de Firebase Auth (correo/contraseña para administrador, `onAuthStateChanged`, `signOut`, manejo de errores en español) en `public/index.html` y `public/js/map.js`; creación de `firestore.rules`; eliminación de `ADMIN_PASSWORD_CORRECTA` y `./calibracion.json` duplicado; simplificación de `server.js` a servidor estático de desarrollo local.
+- **2026-11-26 (Inicio):** Creación de `STATUS.md` base conforme al `Protocolo 0` y `Protocolo 10` (Semilla del Edén) de `.agents/AGENTS.md`, tras auditar la estructura actual del proyecto WebGIS 3D.
 - **Previo en Git (`60db99b`):** Limpieza de código JavaScript y CSS sin uso en `map.js` y `main.css`.
 - **Previo en Git (`6c3a9b2` / `40026fb`):** Integración de visor inmersivo 360° con Three.js, corrección de color sRGB y vinculación de panoramas por administrador.
 - **Previo en Git (`3da243d` / `e800da6`):** Posicionamiento de barra de coordenadas en esquina inferior derecha.
