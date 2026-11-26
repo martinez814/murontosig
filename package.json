@@ -4,7 +4,9 @@
   "description": "Sistema WebGIS con Node.js y Mapbox",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "verify": "node scripts/verify.mjs",
+    "test": "npm run verify"
   },
   "dependencies": {
     "express": "^4.19.2"

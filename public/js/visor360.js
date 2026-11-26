@@ -165,9 +165,12 @@ export function abrirVisor360(urlImagen, titulo, subtitulo) {
     visor360Camera.updateProjectionMatrix();
   }
 
+  const urlNormalizada = String(urlImagen || '')
+    .replace('panoramas/25-11-2026 05.33.48.jpg', 'panoramas/25-11-2026_05-33-48.jpg');
+
   const loader = new THREE.TextureLoader();
   loader.load(
-    urlImagen,
+    encodeURI(urlNormalizada),
     (texture) => {
       texture.mapping = THREE.EquirectangularReflectionMapping;
       texture.encoding = THREE.sRGBEncoding;

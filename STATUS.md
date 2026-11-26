@@ -1,7 +1,7 @@
 # STATUS.md — Sistema WebGIS 3D (CIDE-MÜRÖNTÖ)
 
 > **Última actualización:** 2026-11-26  
-> **Modo de operación:** `Modo Planificador` (trazado de espacios revertido; esperando confirmación para Fase 4 o despliegue)  
+> **Modo de operación:** `Modo Planificador` (Roadmap Base Completado; listo para `git push` y pruebas en producción)  
 > **Metodología:** C://GHOST (regido por `.agents/AGENTS.md`)
 
 ---
@@ -33,15 +33,15 @@ Desarrollar un **Sistema de Información Geográfica (WebGIS 3D)** para la **ges
   1. **Seguridad (`Resuelto en código`):** Eliminada `ADMIN_PASSWORD_CORRECTA` del cliente e integrado **Firebase Authentication** (`firebase-auth-compat.js` + `firestore.rules`). *Pendiente operativo en Firebase Console:* habilitar proveedor Correo/Contraseña, crear usuario admin y publicar `firestore.rules`.
   2. **Limpieza y coherencia (`Parcialmente resuelto`):** Eliminado duplicado `./calibracion.json` en raíz y simplificado `server.js` a servidor estático local; sigue pendiente alinear `public/data/edificio.geojson` (3 niveles genéricos) con `PB` y `Mezzanina`.
   3. **Mantenibilidad (`Resuelto en Fase 2`):** `public/js/map.js` fue desacoplado en 9 módulos ES bajo `public/js/`.
-  4. **Calidad y pruebas:** `package.json` carece de scripts de linting y verificación de datos (Fase 4).
+  4. **Calidad y pruebas (`Resuelto en Fase 4`):** Añadido `scripts/verify.mjs` (`npm run verify` / `npm test`), normalizados nombres de panoramas sin espacios, añadido `.env.example` y cabeceras `Cache-Control` en `vercel.json`.
 
 ---
 
 ## 3. Tarea Activa
 
-- **[QA-01] Fase 4 — Verificación, limpieza final y despliegue (Pendiente de aprobación):**
-  - Trazado de espacios estructurales revertido a solicitud del usuario (`Protocolo 10.3 — Creator Override`).
-  - Esperando confirmación para ejecutar Fase 4 (scripts de validación en `package.json`, normalización de nombres en `public/panoramas/`) o subir `main` a `origin/main` para Vercel.
+- **[OPS-01] Despliegue final y pruebas en vivo:**
+  - Todas las fases técnicas base (Fases 1, 2 y 4) están completadas y verificadas con `npm run verify`.
+  - Pendiente únicamente ejecutar `git push origin main` para actualizar Vercel y verificar el flujo completo en navegador tras configurar Firebase Console.
 
 ---
 
@@ -51,11 +51,13 @@ Desarrollar un **Sistema de Información Geográfica (WebGIS 3D)** para la **ges
 - [x] **[CLN-01] Fase 1 — Saneamiento de configuración y respaldos:** Eliminado `./calibracion.json` duplicado en raíz, simplificado `server.js` a servidor estático de desarrollo local y respaldada gobernanza en Git.
 - [x] **[ARQ-02] Fase 2 — Modularización de `public/js/map.js`:** Separado el monolito en 9 módulos ES (`config.js`, `state.js`, `scene3d.js`, `calibracion.js`, `puntos3d.js`, `auth.js`, `ui.js`, `visor360.js`, `main.js`) cargados vía `<script type="module">` desde `public/index.html`.
 - [~] **[GIS-01] Fase 3 — Trazado de espacios estructurales (polígonos):** Descartado por decisión del usuario (se mantiene la gestión mediante puntos espaciales 3D y modelos `.glb`).
-- [ ] **[QA-01] Fase 4 — Verificación y optimización de activos:** Añadir scripts de validación/lint en `package.json`, normalizar nombres en `public/panoramas/` y optimizar carga de `.glb` y texturas 360° para Vercel.
+- [x] **[QA-01] Fase 4 — Verificación y optimización de activos:** Añadidos `scripts/verify.mjs` y scripts `verify`/`test` en `package.json`, renombrado `25-11-2026_05-33-48.jpg` sin espacios (con compatibilidad legacy en `visor360.js`), cabeceras de caché en `vercel.json` y `.env.example`.
 
 ---
 
 ## 5. Historial de Cambios
+
+- **2026-11-26 (Fase 4):** Creado `scripts/verify.mjs` (`npm run verify` / `npm test`) para validar sintaxis ESM, grafo de imports/exports, manejadores HTML, JSON/GeoJSON, activos y seguridad; normalizado `public/panoramas/25-11-2026_05-33-48.jpg` con fallback compatible en `visor360.js`; configuradas cabeceras `Cache-Control` en `vercel.json` y creado `.env.example`.
 
 - **2026-11-26 (Reversión Fase 3):** Eliminado el módulo de trazado de espacios estructurales (`public/js/espacios.js`, botón `#btnModoDibujoEspacio`, modal `#espacioModal` y capa `#toggle-espacios`), restaurando la arquitectura modular de 9 archivos de la Fase 2.
 
