@@ -1,7 +1,7 @@
 # STATUS.md — Sistema WebGIS 3D (CIDE-MÜRÖNTÖ)
 
 > **Última actualización:** 2026-11-26  
-> **Modo de operación:** `Modo Planificador` (Fase 3 completada; esperando confirmación para Fase 4)  
+> **Modo de operación:** `Modo Planificador` (trazado de espacios revertido; esperando confirmación para Fase 4 o despliegue)  
 > **Metodología:** C://GHOST (regido por `.agents/AGENTS.md`)
 
 ---
@@ -31,16 +31,17 @@ Desarrollar un **Sistema de Información Geográfica (WebGIS 3D)** para la **ges
   - Barra inspectora de coordenadas en esquina inferior derecha.
 - **Hallazgos críticos resueltos y pendientes:**
   1. **Seguridad (`Resuelto en código`):** Eliminada `ADMIN_PASSWORD_CORRECTA` del cliente e integrado **Firebase Authentication** (`firebase-auth-compat.js` + `firestore.rules`). *Pendiente operativo en Firebase Console:* habilitar proveedor Correo/Contraseña, crear usuario admin y publicar `firestore.rules`.
-  2. **Limpieza y coherencia (`Resuelto en Fase 3`):** Eliminado duplicado `./calibracion.json`, simplificado `server.js` y alineado `public/data/edificio.geojson` a los niveles reales (`PB` y `Mezzanina`).
-  3. **Mantenibilidad (`Resuelto en Fase 2`):** `public/js/map.js` fue desacoplado en módulos ES bajo `public/js/` (incluyendo `espacios.js`).
+  2. **Limpieza y coherencia (`Parcialmente resuelto`):** Eliminado duplicado `./calibracion.json` en raíz y simplificado `server.js` a servidor estático local; sigue pendiente alinear `public/data/edificio.geojson` (3 niveles genéricos) con `PB` y `Mezzanina`.
+  3. **Mantenibilidad (`Resuelto en Fase 2`):** `public/js/map.js` fue desacoplado en 9 módulos ES bajo `public/js/`.
   4. **Calidad y pruebas:** `package.json` carece de scripts de linting y verificación de datos (Fase 4).
 
 ---
 
 ## 3. Tarea Activa
 
-- **[QA-01] Fase 4 — Verificación automatizada y optimización de activos (Pendiente de aprobación):**
-  - Fase 3 completada y verificada. Esperando validación del usuario para añadir scripts de verificación en `package.json`, normalizar nombres de panoramas y optimizar carga de `.glb`.
+- **[QA-01] Fase 4 — Verificación, limpieza final y despliegue (Pendiente de aprobación):**
+  - Trazado de espacios estructurales revertido a solicitud del usuario (`Protocolo 10.3 — Creator Override`).
+  - Esperando confirmación para ejecutar Fase 4 (scripts de validación en `package.json`, normalización de nombres en `public/panoramas/`) o subir `main` a `origin/main` para Vercel.
 
 ---
 
@@ -48,15 +49,15 @@ Desarrollar un **Sistema de Información Geográfica (WebGIS 3D)** para la **ges
 
 - [x] **[SEG-01] Fase 1 — Firebase Auth + Reglas Firestore:** Incorporado `firebase-auth-compat.js` en `public/index.html`, reemplazado login estático por `auth.signInWithEmailAndPassword` + `onAuthStateChanged` y creado `firestore.rules`.
 - [x] **[CLN-01] Fase 1 — Saneamiento de configuración y respaldos:** Eliminado `./calibracion.json` duplicado en raíz, simplificado `server.js` a servidor estático de desarrollo local y respaldada gobernanza en Git.
-- [x] **[ARQ-02] Fase 2 — Modularización de `public/js/map.js`:** Separado el monolito en módulos ES (`config.js`, `state.js`, `scene3d.js`, `calibracion.js`, `puntos3d.js`, `auth.js`, `ui.js`, `visor360.js`, `main.js`) cargados vía `<script type="module">` desde `public/index.html`.
-- [x] **[GIS-01] Fase 3 — Gestión de espacios estructurales del edificio (`PB` y `Mezzanina`):** Creado `public/js/espacios.js` con trazado de polígonos, cálculo automático de área ($m^2$), extrusión 3D por nivel, buscador unificado, sincronización Firestore (`edificio/espacios`) y alineación de `public/data/edificio.geojson`.
+- [x] **[ARQ-02] Fase 2 — Modularización de `public/js/map.js`:** Separado el monolito en 9 módulos ES (`config.js`, `state.js`, `scene3d.js`, `calibracion.js`, `puntos3d.js`, `auth.js`, `ui.js`, `visor360.js`, `main.js`) cargados vía `<script type="module">` desde `public/index.html`.
+- [~] **[GIS-01] Fase 3 — Trazado de espacios estructurales (polígonos):** Descartado por decisión del usuario (se mantiene la gestión mediante puntos espaciales 3D y modelos `.glb`).
 - [ ] **[QA-01] Fase 4 — Verificación y optimización de activos:** Añadir scripts de validación/lint en `package.json`, normalizar nombres en `public/panoramas/` y optimizar carga de `.glb` y texturas 360° para Vercel.
 
 ---
 
 ## 5. Historial de Cambios
 
-- **2026-11-26 (Fase 3):** Implementación completa de gestión y visualización de espacios estructurales (`public/js/espacios.js`, `public/data/edificio.geojson`, extrusión 3D `fill-extrusion`, cálculo de área en $m^2$, trazado interactivo de polígonos, modal `#espacioModal`, capa `#toggle-espacios`, buscador unificado y sincronización Firestore `edificio/espacios`).
+- **2026-11-26 (Reversión Fase 3):** Eliminado el módulo de trazado de espacios estructurales (`public/js/espacios.js`, botón `#btnModoDibujoEspacio`, modal `#espacioModal` y capa `#toggle-espacios`), restaurando la arquitectura modular de 9 archivos de la Fase 2.
 
 - **2026-11-26 (Fase 2):** Modularización completa del frontend en `public/js/` (`config.js`, `state.js`, `scene3d.js`, `calibracion.js`, `puntos3d.js`, `auth.js`, `ui.js`, `visor360.js`, `main.js`), actualización de `public/index.html` a `<script type="module" src="js/main.js?v=41">` y eliminación de `public/js/map.js`.
 - **2026-11-26 (Fase 1):** Integración de Firebase Auth (correo/contraseña para administrador, `onAuthStateChanged`, `signOut`, manejo de errores en español) en `public/index.html` y `public/js/map.js`; creación de `firestore.rules`; eliminación de `ADMIN_PASSWORD_CORRECTA` y `./calibracion.json` duplicado; simplificación de `server.js` a servidor estático de desarrollo local.
@@ -70,4 +71,4 @@ Desarrollar un **Sistema de Información Geográfica (WebGIS 3D)** para la **ges
 ## 6. Notas de Gobernanza y Seguridad
 
 - **Zero-Trust (`Protocolo 2`):** No exponer `.env`, llaves privadas ni credenciales en archivos públicos o delegaciones externas.
-- **Respaldo (`Protocolo 7`):** Pendiente commit inicial de `.agents/AGENTS.md` y `STATUS.md` tras aprobación del usuario.
+- **Respaldo (`Protocolo 7`):** Cambios respaldados en commits locales de `main` (pendiente `git push origin main` para desplegar en Vercel).

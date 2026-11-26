@@ -21,17 +21,8 @@ import {
   guardarPuntosEnNube,
   iniciarSincronizacionPuntosNube,
   mostrarPopupPunto,
-  reconstruirIndiceBusqueda,
   sincronizarCapasDesdeColeccion
 } from './puntos3d.js';
-import {
-  agregarVerticeEspacio,
-  cargarEspaciosIniciales,
-  finalizarPoligonoEspacio,
-  inicializarCapasEspacios,
-  iniciarSincronizacionEspaciosNube,
-  mostrarPopupEspacio
-} from './espacios.js';
 import { inicializarSistemaUsuarios } from './auth.js';
 import { actualizarTextoCoordenadas, cargarEstiloMapaGuardado } from './ui.js';
 
@@ -228,7 +219,6 @@ export function reconfigurarFuentesYCapasGeoJSON() {
   if (typeof puestosData !== 'undefined') asegurarCapaOcultaGeoJSON(state.map, 'puestos-source', 'capa-puestos', puestosData);
   if (typeof zonasData !== 'undefined') asegurarCapaOcultaGeoJSON(state.map, 'zonas-source', 'capa-zonas', zonasData);
   if (typeof equipamientoData !== 'undefined') asegurarCapaOcultaGeoJSON(state.map, 'equipos-source', 'capa-equipos', equipamientoData);
-  inicializarCapasEspacios();
 }
 
 /** Inicializa el mapa Mapbox, capas Three.js, eventos de interacción y sincronización. */
@@ -265,10 +255,8 @@ export function inicializarMapa() {
     map.addLayer(custom3DLayer);
     reconfigurarFuentesYCapasGeoJSON();
     cargarPuntosIniciales();
-    cargarEspaciosIniciales(reconstruirIndiceBusqueda);
     inicializarSistemaUsuarios();
     iniciarSincronizacionPuntosNube();
-    iniciarSincronizacionEspaciosNube(reconstruirIndiceBusqueda);
     iniciarSincronizacionCalibracionNube();
     cargarEstiloMapaGuardado();
 
@@ -305,28 +293,13 @@ export function inicializarMapa() {
 
   map.on('mousemove', (e) => {
     actualizarTextoCoordenadas(e.lngLat, 'Longitud');
-    if (!state.modoInsercionPunto && !state.puntoEnMovimientoId && !state.modoDibujoEspacio) {
+    if (!state.modoInsercionPunto && !state.puntoEnMovimientoId) {
       const p3d = buscarPunto3DEnClick(e.point);
-      const sobreEspacio = map.getLayer('capa-espacios-extrusion')
-        ? map.queryRenderedFeatures(e.point, { layers: ['capa-espacios-extrusion'] }).length > 0
-        : false;
-      map.getCanvas().style.cursor = (p3d || sobreEspacio) ? 'pointer' : '';
-    }
-  });
-
-  map.on('dblclick', (e) => {
-    if (state.modoDibujoEspacio && state.verticesDibujoEspacio.length >= 3) {
-      e.preventDefault();
-      finalizarPoligonoEspacio();
+      map.getCanvas().style.cursor = p3d ? 'pointer' : '';
     }
   });
 
   map.on('click', (e) => {
-    if (state.modoDibujoEspacio) {
-      agregarVerticeEspacio(e.lngLat);
-      return;
-    }
-
     if (state.modoInsercionPunto) {
       const lng = parseFloat(e.lngLat.lng.toFixed(6));
       const lat = parseFloat(e.lngLat.lat.toFixed(6));
@@ -353,18 +326,6 @@ export function inicializarMapa() {
     if (punto3D) {
       mostrarPopupPunto(construirFeatureDesdePunto(punto3D), punto3D.coords);
       return;
-    }
-
-    if (map.getLayer('capa-espacios-extrusion')) {
-      const feats = map.queryRenderedFeatures(e.point, { layers: ['capa-espacios-extrusion'] });
-      if (feats.length > 0) {
-        const espId = feats[0].properties && feats[0].properties.id;
-        const espacio = state.coleccionEspacios.find(es => String(es.id) === String(espId));
-        if (espacio) {
-          mostrarPopupEspacio(espacio, e.lngLat);
-          return;
-        }
-      }
     }
 
     actualizarTextoCoordenadas(e.lngLat, 'Punto Seleccionado');

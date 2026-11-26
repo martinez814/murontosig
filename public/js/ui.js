@@ -8,14 +8,8 @@ import {
   actualizarPuntos3D,
   construirFeatureDesdePunto,
   mostrarPopupPunto,
-  reconstruirIndiceBusqueda,
   sincronizarCapasDesdeColeccion
 } from './puntos3d.js';
-import {
-  aplicarVisibilidadYFiltroEspacios,
-  mostrarPopupEspacio,
-  sincronizarEspaciosEnMapa
-} from './espacios.js';
 
 let ultimaCoordenada = MURONTO_CENTER;
 
@@ -66,15 +60,10 @@ export function filtrarPorNivel(piso) {
     });
   }
 
-  aplicarVisibilidadYFiltroEspacios();
   actualizarPuntos3D();
 }
 
 export function toggleCapa(checkboxId, layerId) {
-  if (layerId === 'capa-espacios-extrusion') {
-    aplicarVisibilidadYFiltroEspacios();
-    return;
-  }
   if (state.map && layerId && state.map.getLayer(layerId)) {
     state.map.setLayoutProperty(layerId, 'visibility', 'none');
   }
@@ -113,7 +102,6 @@ export function cambiarEstiloMapa(nuevoEstilo) {
       state.reconfigurarCapasGeoJSON();
     }
     sincronizarCapasDesdeColeccion();
-    sincronizarEspaciosEnMapa(reconstruirIndiceBusqueda);
     actualizarTransparenciaPorZoom();
     actualizarTransformacion();
     actualizarPuntos3D();
@@ -220,7 +208,7 @@ function actualizarSugerencias(query) {
   }
 
   searchSuggestions.innerHTML = resultados.slice(0, 6).map(item => `
-    <div class="suggestion-item" onclick="seleccionarResultado('${String(item.id).replace(/'/g, "\\'")}')">
+    <div class="suggestion-item" onclick="seleccionarResultado(${item.id})">
       <div class="suggestion-left">
         <span style="font-size: 16px;">${item.icon}</span>
         <div>
@@ -252,7 +240,7 @@ export function seleccionarResultado(id) {
 
   state.map.flyTo({
     center: item.coords,
-    zoom: item.kind === 'espacio' ? 19.8 : 20.5,
+    zoom: 20.5,
     pitch: 60,
     bearing: -15,
     essential: true,
@@ -260,17 +248,9 @@ export function seleccionarResultado(id) {
   });
 
   if (state.marcadorBusqueda) state.marcadorBusqueda.remove();
-  state.marcadorBusqueda = new mapboxgl.Marker({ color: item.kind === 'espacio' ? '#7c3aed' : '#ef4444' })
+  state.marcadorBusqueda = new mapboxgl.Marker({ color: '#ef4444' })
     .setLngLat(item.coords)
     .addTo(state.map);
-
-  if (item.kind === 'espacio') {
-    const espacioReal = state.coleccionEspacios.find(e => String(e.id) === String(id));
-    if (espacioReal) {
-      mostrarPopupEspacio(espacioReal, item.coords);
-    }
-    return;
-  }
 
   const puntoReal = state.coleccionPuntos.find(p => String(p.id) === String(id));
   if (puntoReal) {

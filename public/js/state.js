@@ -39,11 +39,8 @@ export const state = {
   // Roles y editor espacial
   usuarioRolActual: null,
   coleccionPuntos: [],
-  coleccionEspacios: [],
   modoInsercionPunto: false,
   puntoEnMovimientoId: null,
-  modoDibujoEspacio: false,
-  verticesDibujoEspacio: [],
 
   // Calibración independiente (Exterior / Interior)
   modeloActivoCalibracion: 'exterior',

@@ -22,23 +22,8 @@ export const STORAGE_KEYS = {
   BASE_ETERNA: 'muronto_base_eterna_v2',
   LEGACY: 'muronto_calibracion_3d_v1',
   PUNTOS: 'muronto_puntos_usuario_v1',
-  ESPACIOS: 'muronto_espacios_estructurales_v1',
   ROL: 'muronto_usuario_rol_v1',
   MAP_STYLE: 'muronto_map_style'
-};
-
-export const TIPOS_ESPACIO_ESTRUCTURAL = {
-  oficina: { label: 'Oficina / Área Operativa', color: '#3b82f6', icon: '🏢' },
-  sala: { label: 'Sala / Auditorio', color: '#10b981', icon: '🏛️' },
-  circulacion: { label: 'Núcleo / Circulación', color: '#8b5cf6', icon: '🪜' },
-  tecnico: { label: 'Cuarto Técnico / Servidores', color: '#f59e0b', icon: '🔌' },
-  comun: { label: 'Área Común / Servicio', color: '#06b6d4', icon: '☕' }
-};
-
-export const ESTADOS_ESPACIO = {
-  Operativo: { label: 'Operativo', bg: '#dcfce7', color: '#15803d' },
-  Mantenimiento: { label: 'Mantenimiento', bg: '#fef3c7', color: '#92400e' },
-  Restringido: { label: 'Acceso Restringido', bg: '#fee2e2', color: '#b91c1c' }
 };
 
 // Base oficial predeterminada (Reinicio Eterno verificado)
