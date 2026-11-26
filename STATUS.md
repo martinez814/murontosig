@@ -1,7 +1,7 @@
 # STATUS.md — Sistema WebGIS 3D (CIDE-MÜRÖNTÖ)
 
 > **Última actualización:** 2026-11-26  
-> **Modo de operación:** `Modo Planificador` (Fase 2 completada; esperando confirmación para Fase 3)  
+> **Modo de operación:** `Modo Planificador` (Fase 3 completada; esperando confirmación para Fase 4)  
 > **Metodología:** C://GHOST (regido por `.agents/AGENTS.md`)
 
 ---
@@ -31,30 +31,32 @@ Desarrollar un **Sistema de Información Geográfica (WebGIS 3D)** para la **ges
   - Barra inspectora de coordenadas en esquina inferior derecha.
 - **Hallazgos críticos resueltos y pendientes:**
   1. **Seguridad (`Resuelto en código`):** Eliminada `ADMIN_PASSWORD_CORRECTA` del cliente e integrado **Firebase Authentication** (`firebase-auth-compat.js` + `firestore.rules`). *Pendiente operativo en Firebase Console:* habilitar proveedor Correo/Contraseña, crear usuario admin y publicar `firestore.rules`.
-  2. **Limpieza y coherencia (`Parcialmente resuelto`):** Eliminado duplicado `./calibracion.json` en raíz y simplificado `server.js` a servidor estático local; sigue pendiente alinear `public/data/edificio.geojson` (3 niveles genéricos) con `PB` y `Mezzanina`.
-  3. **Mantenibilidad (`Resuelto en Fase 2`):** `public/js/map.js` fue desacoplado en 9 módulos ES bajo `public/js/`.
+  2. **Limpieza y coherencia (`Resuelto en Fase 3`):** Eliminado duplicado `./calibracion.json`, simplificado `server.js` y alineado `public/data/edificio.geojson` a los niveles reales (`PB` y `Mezzanina`).
+  3. **Mantenibilidad (`Resuelto en Fase 2`):** `public/js/map.js` fue desacoplado en módulos ES bajo `public/js/` (incluyendo `espacios.js`).
   4. **Calidad y pruebas:** `package.json` carece de scripts de linting y verificación de datos (Fase 4).
 
 ---
 
 ## 3. Tarea Activa
 
-- **[GIS-01] Fase 3 — Gestión de espacios estructurales del edificio (`PB` y `Mezzanina`) (Pendiente de aprobación):**
-  - Fase 2 completada. Esperando validación del usuario para iniciar el modelado y gestión de polígonos/espacios estructurales del edificio.
+- **[QA-01] Fase 4 — Verificación automatizada y optimización de activos (Pendiente de aprobación):**
+  - Fase 3 completada y verificada. Esperando validación del usuario para añadir scripts de verificación en `package.json`, normalizar nombres de panoramas y optimizar carga de `.glb`.
 
 ---
 
 ## 4. Backlog Priorizado
 
-- [x] **[SEG-01] Fase 1 — Firebase Auth + Reglas Firestore:** Incorporado `firebase-auth-compat.js` en `public/index.html`, reemplazado login estático en `public/js/map.js` por `auth.signInWithEmailAndPassword` + `onAuthStateChanged` y creado `firestore.rules`.
+- [x] **[SEG-01] Fase 1 — Firebase Auth + Reglas Firestore:** Incorporado `firebase-auth-compat.js` en `public/index.html`, reemplazado login estático por `auth.signInWithEmailAndPassword` + `onAuthStateChanged` y creado `firestore.rules`.
 - [x] **[CLN-01] Fase 1 — Saneamiento de configuración y respaldos:** Eliminado `./calibracion.json` duplicado en raíz, simplificado `server.js` a servidor estático de desarrollo local y respaldada gobernanza en Git.
-- [x] **[ARQ-02] Fase 2 — Modularización de `public/js/map.js`:** Separado el monolito en 9 módulos ES (`config.js`, `state.js`, `scene3d.js`, `calibracion.js`, `puntos3d.js`, `auth.js`, `ui.js`, `visor360.js`, `main.js`) cargados vía `<script type="module">` desde `public/index.html`.
-- [ ] **[GIS-01] Fase 3 — Gestión de espacios estructurales del edificio (`PB` y `Mezzanina`):** Ampliar modelo de datos en Firestore/GeoJSON para registrar polígonos/zonas estructurales del edificio (áreas, capacidad/aforo, tipo estructural, estado, nivel y panoramas 360° asociados) y alinear `public/data/edificio.geojson` con `PB` y `Mezzanina`.
+- [x] **[ARQ-02] Fase 2 — Modularización de `public/js/map.js`:** Separado el monolito en módulos ES (`config.js`, `state.js`, `scene3d.js`, `calibracion.js`, `puntos3d.js`, `auth.js`, `ui.js`, `visor360.js`, `main.js`) cargados vía `<script type="module">` desde `public/index.html`.
+- [x] **[GIS-01] Fase 3 — Gestión de espacios estructurales del edificio (`PB` y `Mezzanina`):** Creado `public/js/espacios.js` con trazado de polígonos, cálculo automático de área ($m^2$), extrusión 3D por nivel, buscador unificado, sincronización Firestore (`edificio/espacios`) y alineación de `public/data/edificio.geojson`.
 - [ ] **[QA-01] Fase 4 — Verificación y optimización de activos:** Añadir scripts de validación/lint en `package.json`, normalizar nombres en `public/panoramas/` y optimizar carga de `.glb` y texturas 360° para Vercel.
 
 ---
 
 ## 5. Historial de Cambios
+
+- **2026-11-26 (Fase 3):** Implementación completa de gestión y visualización de espacios estructurales (`public/js/espacios.js`, `public/data/edificio.geojson`, extrusión 3D `fill-extrusion`, cálculo de área en $m^2$, trazado interactivo de polígonos, modal `#espacioModal`, capa `#toggle-espacios`, buscador unificado y sincronización Firestore `edificio/espacios`).
 
 - **2026-11-26 (Fase 2):** Modularización completa del frontend en `public/js/` (`config.js`, `state.js`, `scene3d.js`, `calibracion.js`, `puntos3d.js`, `auth.js`, `ui.js`, `visor360.js`, `main.js`), actualización de `public/index.html` a `<script type="module" src="js/main.js?v=41">` y eliminación de `public/js/map.js`.
 - **2026-11-26 (Fase 1):** Integración de Firebase Auth (correo/contraseña para administrador, `onAuthStateChanged`, `signOut`, manejo de errores en español) en `public/index.html` y `public/js/map.js`; creación de `firestore.rules`; eliminación de `ADMIN_PASSWORD_CORRECTA` y `./calibracion.json` duplicado; simplificación de `server.js` a servidor estático de desarrollo local.

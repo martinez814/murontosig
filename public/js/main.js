@@ -44,10 +44,22 @@ import {
   iniciarMoverPunto,
   onCambiarPisoModal,
   previsualizarElevacionPunto,
+  reconstruirIndiceBusqueda,
   seleccionarCategoriaPorDefecto,
   seleccionarEmoji,
   toggleModoInsercion
 } from './puntos3d.js';
+import {
+  abrirEditorEspacio,
+  cancelarDibujoEspacio,
+  cerrarModalEspacio,
+  deshacerVerticeEspacio,
+  eliminarEspacio as eliminarEspacioBase,
+  finalizarPoligonoEspacio,
+  guardarEspacioModal as guardarEspacioModalBase,
+  onCambiarPisoEspacio,
+  toggleModoDibujoEspacio as toggleModoDibujoEspacioBase
+} from './espacios.js';
 import { inicializarMapa } from './scene3d.js';
 import {
   autoCerrarPanelEnMovil,
@@ -70,6 +82,14 @@ import {
   cerrarVisor360,
   toggleAutoGiro360
 } from './visor360.js';
+
+const toggleModoDibujoEspacio = () => toggleModoDibujoEspacioBase(cancelarAccionEditor);
+const guardarEspacioModal = () => guardarEspacioModalBase(reconstruirIndiceBusqueda);
+const eliminarEspacio = (id) => eliminarEspacioBase(id, reconstruirIndiceBusqueda);
+const cancelarEdicionActiva = () => {
+  cancelarAccionEditor();
+  cancelarDibujoEspacio();
+};
 
 // Exponer manejadores globales requeridos por atributos HTML (onclick / oninput / onchange)
 Object.assign(window, {
@@ -121,7 +141,7 @@ Object.assign(window, {
   iniciarMoverPunto,
   eliminarPunto,
   toggleModoInsercion,
-  cancelarAccionEditor,
+  cancelarAccionEditor: cancelarEdicionActiva,
   cerrarModalPunto,
   seleccionarEmoji,
   seleccionarCategoriaPorDefecto,
@@ -130,6 +150,16 @@ Object.assign(window, {
   actualizarEscalaDinamicaPuntos,
   actualizarOrientacionCamaraPuntos,
   guardarPuntosEnNube,
+
+  // Espacios estructurales del edificio (PB y Mezzanina)
+  toggleModoDibujoEspacio,
+  deshacerVerticeEspacio,
+  finalizarPoligonoEspacio,
+  abrirEditorEspacio,
+  cerrarModalEspacio,
+  onCambiarPisoEspacio,
+  guardarEspacioModal,
+  eliminarEspacio,
 
   // Visor inmersivo 360°
   abrirVisor360,

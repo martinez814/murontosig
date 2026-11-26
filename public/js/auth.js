@@ -5,6 +5,7 @@ import { STORAGE_KEYS, auth } from './config.js';
 import { state } from './state.js';
 import { sincronizarSlidersUI } from './calibracion.js';
 import { cancelarAccionEditor, mostrarPopupPunto, construirFeatureDesdePunto } from './puntos3d.js';
+import { cancelarDibujoEspacio } from './espacios.js';
 import { toggleColapsoControlPanel, togglePanelMovil } from './ui.js';
 
 let authListenerRegistrado = false;
@@ -189,6 +190,7 @@ export async function cerrarSesionUsuario() {
     }
   }
   cancelarAccionEditor();
+  cancelarDibujoEspacio();
   if (state.popupActivo) state.popupActivo.remove();
   mostrarVentanaLogin();
 }

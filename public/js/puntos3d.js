@@ -4,6 +4,7 @@
 import { MURONTO_CENTER, STORAGE_KEYS, db, elevacionPorDefecto, firebaseHabilitado, normalizarPiso } from './config.js';
 import { state } from './state.js';
 import { filtrarPorNivel } from './ui.js';
+import { cancelarDibujoEspacio, obtenerEntradasBusquedaEspacios } from './espacios.js';
 
 /** Construye un objeto GeoJSON Feature a partir de un punto de colección. */
 export function construirFeatureDesdePunto(punto) {
@@ -76,11 +77,40 @@ export function cargarPuntosIniciales() {
   sincronizarCapasDesdeColeccion();
 }
 
+export function reconstruirIndiceBusqueda() {
+  if (typeof searchData === 'undefined') return;
+  const listaBusqueda = [];
+
+  state.coleccionPuntos.forEach(p => {
+    const floorNorm = normalizarPiso(p.floor);
+    const altZ = typeof p.altitude === 'number' ? p.altitude : elevacionPorDefecto(floorNorm);
+    let catTexto = 'Puestos de Trabajo';
+    if (p.categoria === 'zona') catTexto = 'Salas y Zonas';
+    if (p.categoria === 'equipo') catTexto = 'Equipos y Servicios';
+
+    listaBusqueda.push({
+      id: p.id,
+      kind: 'punto',
+      label: p.nombre,
+      category: catTexto,
+      coords: [p.coords[0], p.coords[1]],
+      floor: floorNorm,
+      altitude: altZ,
+      icon: p.icono || '📍',
+      info: p.detalle || `${catTexto} - ${floorNorm}`
+    });
+  });
+
+  obtenerEntradasBusquedaEspacios().forEach(item => listaBusqueda.push(item));
+
+  searchData.length = 0;
+  listaBusqueda.forEach(item => searchData.push(item));
+}
+
 export function sincronizarCapasDesdeColeccion() {
   const featuresPuestos = [];
   const featuresZonas = [];
   const featuresEquipos = [];
-  const listaBusqueda = [];
 
   state.coleccionPuntos.forEach(p => {
     const floorNorm = normalizarPiso(p.floor);
@@ -109,31 +139,13 @@ export function sincronizarCapasDesdeColeccion() {
     if (p.categoria === 'puesto') featuresPuestos.push(feature);
     else if (p.categoria === 'zona') featuresZonas.push(feature);
     else featuresEquipos.push(feature);
-
-    let catTexto = 'Puestos de Trabajo';
-    if (p.categoria === 'zona') catTexto = 'Salas y Zonas';
-    if (p.categoria === 'equipo') catTexto = 'Equipos y Servicios';
-
-    listaBusqueda.push({
-      id: p.id,
-      label: p.nombre,
-      category: catTexto,
-      coords: [p.coords[0], p.coords[1]],
-      floor: floorNorm,
-      altitude: altZ,
-      icon: p.icono || '📍',
-      info: p.detalle || `${catTexto} - ${floorNorm}`
-    });
   });
 
   if (typeof puestosData !== 'undefined') puestosData.features = featuresPuestos;
   if (typeof zonasData !== 'undefined') zonasData.features = featuresZonas;
   if (typeof equipamientoData !== 'undefined') equipamientoData.features = featuresEquipos;
 
-  if (typeof searchData !== 'undefined') {
-    searchData.length = 0;
-    listaBusqueda.forEach(item => searchData.push(item));
-  }
+  reconstruirIndiceBusqueda();
 
   if (state.map && state.map.getSource('puestos-source') && typeof puestosData !== 'undefined') {
     state.map.getSource('puestos-source').setData(puestosData);
@@ -254,8 +266,9 @@ export function toggleModoInsercion() {
     return;
   }
 
-  if (state.puntoEnMovimientoId) {
+  if (state.puntoEnMovimientoId || state.modoDibujoEspacio) {
     cancelarAccionEditor();
+    cancelarDibujoEspacio();
   }
 
   state.modoInsercionPunto = !state.modoInsercionPunto;
