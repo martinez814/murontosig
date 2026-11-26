@@ -127,7 +127,6 @@ let grupoInterior = null;       // Grupo Three.js independiente para Estructura 
 let grupoPuntos3D = null;       // Grupo Three.js independiente para Puntos Espaciales 3D con elevación Z
 let gltfModelScene = null;      // Fachada Exterior (edificioM-v1.glb)
 let gltfInteriorScene = null;   // Estructura Interior (medidasmetros-v2.glb)
-let nodoTerreno = null;
 let modelTransform = {};
 
 // Sincronizar matriz base de Mapbox y aplicar transformaciones a cada grupo
@@ -268,8 +267,6 @@ const custom3DLayer = {
 
     // 2. Cargar modelo exterior (Fachada edificioM-v1.glb)
     const loader = new THREE.GLTFLoader();
-    const statusContainer = document.getElementById('modelStatus');
-    const statusText = document.getElementById('modelStatusText');
 
     loader.load(
       'models/edificioM-v1.glb',
@@ -300,10 +297,6 @@ const custom3DLayer = {
           }
         });
 
-        if (statusContainer && statusText) {
-          statusContainer.className = 'model-status-indicator ready';
-          statusText.textContent = `✓ Fachada cargada (${size.x.toFixed(0)}m x ${size.z.toFixed(0)}m, Alt: ${size.y.toFixed(1)}m)`;
-        }
         console.log('✓ Fachada exterior edificioM-v1.glb cargada:', size);
 
         actualizarTransformacion();
@@ -318,8 +311,6 @@ const custom3DLayer = {
 
     // 3. Cargar segundo modelo: Estructura Interior (medidasmetros-v2.glb)
     const loaderInterior = new THREE.GLTFLoader();
-    const interiorStatus = document.getElementById('interiorStatus');
-    const interiorText = document.getElementById('interiorStatusText');
 
     loaderInterior.load(
       'models/medidasmetros-v2.glb',
@@ -346,10 +337,6 @@ const custom3DLayer = {
 
         grupoInterior.add(gltfInteriorScene);
 
-        if (interiorStatus && interiorText) {
-          interiorStatus.className = 'model-status-indicator ready';
-          interiorText.textContent = `✓ Interior cargado (${sizeInt.x.toFixed(0)}m x ${sizeInt.z.toFixed(0)}m, Alt: ${sizeInt.y.toFixed(1)}m)`;
-        }
         console.log('✓ Estructura interior medidasmetros-v2.glb cargada exitosamente:', sizeInt);
 
         actualizarTransformacion();
@@ -357,10 +344,6 @@ const custom3DLayer = {
       },
       undefined,
       (errInt) => {
-        if (interiorStatus && interiorText) {
-          interiorStatus.className = 'model-status-indicator waiting';
-          interiorText.textContent = 'Esperando models/medidasmetros-v2.glb';
-        }
         console.info('Aviso: Coloca tu archivo en public/models/medidasmetros-v2.glb para ver el interior.');
       }
     );
@@ -574,14 +557,6 @@ function toggleColapsoControlPanel(forzarColapso) {
       btn.title = 'Minimizar ventana';
     }
   }
-}
-
-function colapsarControlPanel(colapsar) {
-  toggleColapsoControlPanel(colapsar);
-}
-
-function toggleOcultarPanel(forzarOcultar) {
-  toggleColapsoControlPanel(forzarOcultar);
 }
 
 function togglePanelMovil(abrir) {
@@ -1072,60 +1047,6 @@ function restablecerCalibracion() {
       feedback.style.display = 'none';
       feedback.style.color = '#166534';
     }, 3000);
-  }
-}
-
-// Copiar configuración al portapapeles para pegarla en el chat con Antigravity
-function copiarCalibracionParaChat() {
-  const config = obtenerConfigCalibracion();
-  const jsonStr = JSON.stringify(config, null, 2);
-  navigator.clipboard.writeText(jsonStr).then(() => {
-    const feedback = document.getElementById('saveFeedback');
-    if (feedback) {
-      feedback.style.display = 'block';
-      feedback.style.color = '#1e40af';
-      feedback.textContent = '📋 ¡Coordenadas copiadas! Pégalas en el chat de Antigravity.';
-      setTimeout(() => {
-        feedback.style.display = 'none';
-        feedback.style.color = '#166534';
-      }, 4000);
-    }
-  }).catch(() => {
-    prompt('Copia manualmente este texto para pegarlo en el chat:', jsonStr);
-  });
-}
-
-// Descargar calibracion.json directamente con el navegador
-function descargarCalibracionJson() {
-  const config = obtenerConfigCalibracion();
-  const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(config, null, 2));
-  const a = document.createElement('a');
-  a.setAttribute('href', dataStr);
-  a.setAttribute('download', 'calibracion.json');
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-
-  const feedback = document.getElementById('saveFeedback');
-  if (feedback) {
-    feedback.style.display = 'block';
-    feedback.style.color = '#166534';
-    feedback.textContent = '📥 Descargando calibracion.json con tus ajustes actuales...';
-    setTimeout(() => { feedback.style.display = 'none'; }, 4000);
-  }
-}
-
-function toggleModeloReal() {
-  const checkbox = document.getElementById('toggle-modelo-real');
-  modeloRealVisible = checkbox ? checkbox.checked : true;
-  map.triggerRepaint();
-}
-
-function toggleTerrenoModelo() {
-  const checkbox = document.getElementById('toggle-terreno-glb');
-  if (nodoTerreno) {
-    nodoTerreno.visible = checkbox ? checkbox.checked : true;
-    map.triggerRepaint();
   }
 }
 
@@ -2003,81 +1924,6 @@ function eliminarPunto(id) {
   }
 }
 
-function generarCodigoOfficeData() {
-  const puestos = coleccionPuntos.filter(p => p.categoria === 'puesto');
-  const zonas = coleccionPuntos.filter(p => p.categoria === 'zona');
-  const equipos = coleccionPuntos.filter(p => p.categoria === 'equipo');
-
-  const formatoFeature = (p) => `    {
-      type: 'Feature',
-      geometry: { type: 'Point', coordinates: [${p.coords[0]}, ${p.coords[1]}] },
-      properties: {
-        id: ${p.id},
-        nombre: ${JSON.stringify(p.nombre)},
-        categoria: ${JSON.stringify(p.categoria)},
-        floor: ${JSON.stringify(p.floor)},
-        altitude: ${typeof p.altitude === 'number' ? p.altitude : (p.floor === 'Mezzanina' ? 3.6 : 0.8)},
-        icono: ${JSON.stringify(p.icono || '📍')},
-        detalle: ${JSON.stringify(p.detalle || '')},
-        foto360: ${JSON.stringify(p.foto360 || '')}
-      }
-    }`;
-
-  return `// ==========================================
-// DATOS ESPACIALES DE INTERIOR - CIDE-MÜRÖNTÖ
-// Coordenada Central Sede: [-66.871326, 10.453025]
-// Niveles Arquitectónicos: PB (Planta Baja) y Mezzanina
-// ==========================================
-
-// 1. PUESTOS DE TRABAJO
-const puestosData = {
-  type: 'FeatureCollection',
-  features: [
-${puestos.map(formatoFeature).join(',\n')}
-  ]
-};
-
-// 2. SALAS Y ZONAS COMUNES
-const zonasData = {
-  type: 'FeatureCollection',
-  features: [
-${zonas.map(formatoFeature).join(',\n')}
-  ]
-};
-
-// 3. EQUIPAMIENTO Y SERVICIOS
-const equipamientoData = {
-  type: 'FeatureCollection',
-  features: [
-${equipos.map(formatoFeature).join(',\n')}
-  ]
-};
-
-// 4. ÍNDICE DE BÚSQUEDA Y AUTOCOMPLETADO
-const searchData = ${JSON.stringify(searchData, null, 2)};
-`;
-}
-
-function copiarPuntosCodigo() {
-  const jsContent = generarCodigoOfficeData();
-  navigator.clipboard.writeText(jsContent).then(() => {
-    alert('✓ ¡Código copiado al portapapeles!\n\nPégalo en el chat de Antigravity o reemplaza el contenido de public/office_data.js para guardarlo de por vida.');
-  }).catch(() => {
-    prompt('Copia manualmente este código:', jsContent);
-  });
-}
-
-function descargarOfficeDataJs() {
-  const jsContent = generarCodigoOfficeData();
-  const dataStr = 'data:text/javascript;charset=utf-8,' + encodeURIComponent(jsContent);
-  const a = document.createElement('a');
-  a.setAttribute('href', dataStr);
-  a.setAttribute('download', 'office_data.js');
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
-
 async function autoGuardarPuntosEnDisco() {
   // Sincronizar automáticamente en la Nube (Google Cloud Firestore) para todos los usuarios
   await guardarPuntosEnNube();
@@ -2303,7 +2149,7 @@ function actualizarPuntos3D() {
   }
 
   const puestosVisibles = document.getElementById('toggle-puestos') ? document.getElementById('toggle-puestos').checked : true;
-  const zonasVisibles = (document.getElementById('toggle-salas') || document.getElementById('toggle-zonas')) ? (document.getElementById('toggle-salas') || document.getElementById('toggle-zonas')).checked : true;
+  const zonasVisibles = document.getElementById('toggle-salas') ? document.getElementById('toggle-salas').checked : true;
   const equiposVisibles = document.getElementById('toggle-equipos') ? document.getElementById('toggle-equipos').checked : true;
 
   const originCoord = mapboxgl.MercatorCoordinate.fromLngLat(MURONTO_CENTER, 0);
@@ -2398,8 +2244,6 @@ window.cerrarModalPunto = cerrarModalPunto;
 window.seleccionarEmoji = seleccionarEmoji;
 window.seleccionarCategoriaPorDefecto = seleccionarCategoriaPorDefecto;
 window.guardarPuntoModal = guardarPuntoModal;
-window.copiarPuntosCodigo = copiarPuntosCodigo;
-window.descargarOfficeDataJs = descargarOfficeDataJs;
 window.filtrarPorNivel = filtrarPorNivel;
 window.toggleCapa = toggleCapa;
 window.actualizarPuntos3D = actualizarPuntos3D;
@@ -2408,7 +2252,6 @@ window.actualizarOrientacionCamaraPuntos = actualizarOrientacionCamaraPuntos;
 
 // Exportar funciones de calibración y posición de estructuras 3D (Exclusivo Administrador)
 window.seleccionarModeloCalibrar = seleccionarModeloCalibrar;
-window.cambiarModeloCalibracion = seleccionarModeloCalibrar;
 window.copiarPosicionExteriorAInterior = copiarPosicionExteriorAInterior;
 window.ajustarRotacion = ajustarRotacion;
 window.ajustarInclinacion = ajustarInclinacion;
@@ -2418,8 +2261,6 @@ window.ajustarEscala = ajustarEscala;
 window.ajustarElevacion = ajustarElevacion;
 window.guardarCalibracion = guardarCalibracion;
 window.restablecerCalibracion = restablecerCalibracion;
-window.copiarCalibracionParaChat = copiarCalibracionParaChat;
-window.descargarCalibracionJson = descargarCalibracionJson;
 window.sincronizarSlidersUI = sincronizarSlidersUI;
 window.guardarPuntosEnNube = guardarPuntosEnNube;
 
@@ -2595,10 +2436,8 @@ window.cerrarVentanaLogin = cerrarVentanaLogin;
 window.cambiarEstiloMapa = cambiarEstiloMapa;
 window.toggleColapsoEstilos = toggleColapsoEstilos;
 window.toggleColapsoControlPanel = toggleColapsoControlPanel;
-window.colapsarControlPanel = colapsarControlPanel;
 window.togglePanelMovil = togglePanelMovil;
 window.autoCerrarPanelEnMovil = autoCerrarPanelEnMovil;
-window.toggleOcultarPanel = toggleOcultarPanel;
 
 // ==========================================
 // VISOR INMERSIVO 360° NATIVO CON THREE.JS
